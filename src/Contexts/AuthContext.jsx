@@ -1,3 +1,4 @@
+// Contexts/AuthContext.jsx
 import React, { createContext, useEffect, useState } from 'react';
 
 const AuthContext = createContext();
@@ -5,45 +6,40 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on initial load
-    const loggedIn = localStorage.getItem('isLoggedIn') === 'true';
-    const role = localStorage.getItem('userRole');
+    const savedToken = localStorage.getItem('token');
+    const savedRole = localStorage.getItem('userRole');
 
-    if (loggedIn && role) {
+    if (savedToken && savedRole) {
       setIsLoggedIn(true);
-      setUserRole(role);
+      setToken(savedToken);
+      setUserRole(savedRole);
     }
-
     setLoading(false);
   }, []);
 
-  const login = role => {
-    localStorage.setItem('isLoggedIn', 'true');
+  const login = (token, role) => {
+    localStorage.setItem('token', token);
     localStorage.setItem('userRole', role);
-    setIsLoggedIn(true);
+    setToken(token);
     setUserRole(role);
+    setIsLoggedIn(true);
   };
 
   const logout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('userRole');
+    localStorage.clear();
     setIsLoggedIn(false);
     setUserRole(null);
-  };
-
-  const value = {
-    isLoggedIn,
-    userRole,
-    login,
-    logout,
-    loading,
+    setToken(null);
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider
+      value={{ isLoggedIn, userRole, token, login, logout, loading }}
+    >
       {!loading && children}
     </AuthContext.Provider>
   );

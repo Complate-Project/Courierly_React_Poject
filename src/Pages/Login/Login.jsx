@@ -1,203 +1,252 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../Hooks/useAuth';
-import { FiPackage, FiUser, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
-import useTitle from '../../Hooks/useTitle';
+import {
+  FiUser,
+  FiLock,
+  FiMail,
+  FiAlertCircle,
+  FiLoader,
+  FiEye,
+  FiEyeOff,
+  FiHelpCircle,
+  FiShield,
+} from 'react-icons/fi';
+
+const ROLE_MAP = {
+  10: 'rider',
+  20: 'branch',
+  30: 'admin',
+};
 
 const Login = () => {
-  useTitle('Dashboard Login');
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+  const [isHovered, setIsHovered] = useState(false);
+
   const { login } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem('rememberedEmail');
+    if (rememberedEmail) {
+      setEmail(rememberedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleLogin = async e => {
     e.preventDefault();
+    setLoading(true);
     setError('');
-    setIsLoading(true);
 
-    if (!username || !password) {
-      setError('Please enter both username and password');
-      setIsLoading(false);
-      return;
+    try {
+      const res = await fetch('https://courierly.demo-bd.com/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        throw new Error(
+          data.message || 'Login failed. Please check your credentials.'
+        );
+      }
+
+      const token = data.token.token;
+      const roleNumber = data.user.role;
+      const role = ROLE_MAP[roleNumber];
+
+      if (!role) {
+        throw new Error('Invalid user role. Please contact support.');
+      }
+
+      login(token, role);
+
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', email);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+      }
+
+      navigate(`/${role}/dashboard`);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    let role = '';
-    if (username === 'admin') {
-      role = 'admin';
-    } else if (username === 'rider') {
-      role = 'rider';
-    } else if (username === 'branch') {
-      role = 'branch';
-    } else {
-      setError('Invalid credentials');
-      setIsLoading(false);
-      return;
-    }
-
-    login(role);
-    setIsLoading(false);
-    navigate(`/${role}/dashboard`);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        {/* Logo */}
-        <div className="flex justify-center">
-          <div className="bg-blue-600 p-3 rounded-xl">
-            <FiPackage className="h-8 w-8 text-white" />
-          </div>
-        </div>
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          QuickDeliver
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Sign in to your account
-        </p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4">
+      {/* Decorative Elements */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500"></div>
+
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 -left-20 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div className="absolute top-1/3 -right-20 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-20 left-1/2 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-6 shadow rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleLogin}>
+      {/* Main Card */}
+      <div className="relative w-full max-w-xl">
+        {/* Card */}
+        <div
+          className="bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all duration-300 hover:shadow-3xl"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {/* Card Header */}
+          <div className="relative p-8 pb-6 bg-gradient-to-r from-blue-600 to-purple-600">
+            <div className="flex items-center justify-center space-x-3 mb-4">
+              <div
+                className={`p-3 bg-white/20 rounded-full transition-transform duration-300 ${
+                  isHovered ? 'rotate-12' : ''
+                }`}
+              >
+                <FiShield className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-white">Courierly</h1>
+                <p className="text-blue-100 text-sm font-medium">
+                  Secure Login Portal
+                </p>
+              </div>
+            </div>
+
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Welcome Back
+              </h2>
+              <p className="text-blue-100">
+                Please enter your credentials to continue
+              </p>
+            </div>
+
+            {/* Animated border effect */}
+            <div
+              className={`absolute bottom-0 left-0 h-1 bg-gradient-to-r from-yellow-400 to-pink-500 transition-all duration-500 ${
+                isHovered ? 'w-full' : 'w-0'
+              }`}
+            ></div>
+          </div>
+
+          {/* Card Body */}
+          <div className="p-8 pt-6">
+            {/* Error Message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                <p className="text-red-700 text-sm text-center">{error}</p>
+              <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-red-100 border border-red-200 rounded-xl flex items-center space-x-3 animate-fadeIn">
+                <FiAlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                <p className="text-red-700 text-sm font-medium">{error}</p>
               </div>
             )}
 
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Username
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiUser className="h-5 w-5 text-gray-400" />
+            {/* Form */}
+            <form onSubmit={handleLogin} className="space-y-6">
+              {/* Email Field */}
+              <div className="space-y-2">
+                <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
+                  <FiMail className="w-4 h-4 text-blue-500" />
+                  <span>Email Address</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    required
+                    disabled={loading}
+                    className="w-full px-4 py-3 pl-11 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                  <FiMail className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 </div>
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  required
-                  className="appearance-none block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Enter username"
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
-                />
               </div>
-            </div>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Password
-              </label>
-              <div className="mt-1 relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="h-5 w-5 text-gray-400" />
+              {/* Password Field */}
+              <div className="space-y-2">
+                <label className="flex items-center space-x-2 text-sm font-semibold text-gray-700">
+                  <FiLock className="w-4 h-4 text-blue-500" />
+                  <span>Password</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    required
+                    disabled={loading}
+                    className="w-full px-4 py-3 pl-11 pr-11 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                  <FiLock className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                  >
+                    {showPassword ? (
+                      <FiEyeOff className="w-4 h-4" />
+                    ) : (
+                      <FiEye className="w-4 h-4" />
+                    )}
+                  </button>
                 </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  className="appearance-none block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Enter password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <FiEyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  ) : (
-                    <FiEye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
-                  )}
-                </button>
               </div>
-            </div>
 
-            <div>
+              {/* Submit Button */}
               <button
                 type="submit"
-                disabled={isLoading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={loading}
+                className={`w-full py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 ${
+                  loading
+                    ? 'bg-gradient-to-r from-blue-500 to-blue-600'
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl'
+                }`}
               >
-                {isLoading ? (
-                  <div className="flex items-center">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Signing in...
-                  </div>
+                {loading ? (
+                  <span className="flex items-center justify-center space-x-2">
+                    <FiLoader className="w-5 h-5 animate-spin" />
+                    <span>Signing in...</span>
+                  </span>
                 ) : (
-                  'Sign in'
+                  'Sign In'
                 )}
               </button>
-            </div>
-          </form>
+            </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Demo Accounts
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-4 space-y-3">
-              <div className="text-center">
-                <button
-                  onClick={() => {
-                    setUsername('admin');
-                    setPassword('password123');
-                  }}
-                  className="text-sm text-blue-600 hover:text-blue-500"
-                >
-                  Admin: admin / any password
-                </button>
-              </div>
-              <div className="text-center">
-                <button
-                  onClick={() => {
-                    setUsername('rider');
-                    setPassword('password123');
-                  }}
-                  className="text-sm text-blue-600 hover:text-blue-500"
-                >
-                  Rider: rider / any password
-                </button>
-              </div>
-              <div className="text-center">
-                <button
-                  onClick={() => {
-                    setUsername('branch');
-                    setPassword('password123');
-                  }}
-                  className="text-sm text-blue-600 hover:text-blue-500"
-                >
-                  Branch: branch / any password
-                </button>
+            {/* Footer */}
+            <div className="mt-6 pt-4 border-t border-gray-100">
+              <div className="flex flex-col items-center space-y-2">
+                <p className="text-sm text-gray-600">
+                  Need assistance?{' '}
+                  <button
+                    onClick={() => navigate('/contact')}
+                    className="font-semibold text-blue-600 hover:text-blue-700 transition-colors duration-200"
+                  >
+                    Contact Support
+                  </button>
+                </p>
+                <p className="text-xs text-gray-500">
+                  © {new Date().getFullYear()} Courierly. All rights reserved.
+                </p>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Additional decorative elements */}
+        <div className="absolute -z-10 -top-4 -left-4 w-20 h-20 bg-blue-500 rounded-full opacity-10 blur-xl"></div>
+        <div className="absolute -z-10 -bottom-4 -right-4 w-20 h-20 bg-purple-500 rounded-full opacity-10 blur-xl"></div>
       </div>
     </div>
   );
