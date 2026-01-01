@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   FiRefreshCcw,
   FiList,
@@ -9,50 +10,45 @@ import {
 } from 'react-icons/fi';
 import useTitle from '../../../Hooks/useTitle';
 
+const PICKUP_API = 'https://courierly.demo-bd.com/api/rider-pickup-parcel-list';
+const AUTO_PICKUP_API =
+  'https://courierly.demo-bd.com/api/rider-auto-pickup-parcel-list';
+
 const Pickup = () => {
   useTitle('Rider Dashboard | Pickup');
-  const [activeTab, setActiveTab] = useState('pickup');
 
-  // 🧩 Fake Data
-  const pickupData = [
-    {
-      id: 1,
-      date: '2025-10-23',
-      trackingId: 'PK12345',
-      merchant: 'ABC Store',
-      customer: 'John Doe',
-      address: 'House 12, Road 5, Dhaka',
-    },
-    {
-      id: 2,
-      date: '2025-10-22',
-      trackingId: 'PK12346',
-      merchant: 'XYZ Shop',
-      customer: 'Jane Smith',
-      address: '23 Green Road, Rajshahi',
-    },
-  ];
+  const [activeTab, setActiveTab] = useState('pickup'); // pickup | auto-pickup
+  const [pickupData, setPickupData] = useState([]);
+  const [autoPickupData, setAutoPickupData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const autoPickupData = [
-    {
-      id: 1,
-      trackingId: 'AP98765',
-      pickupDate: '2025-10-25',
-      pickupTime: '10:30 AM',
-      merchant: 'TechBazaar',
-      type: 'Scheduled',
-      status: 'Pending',
-    },
-    {
-      id: 2,
-      trackingId: 'AP98766',
-      pickupDate: '2025-10-26',
-      pickupTime: '2:00 PM',
-      merchant: 'Digital Mart',
-      type: 'Scheduled',
-      status: 'Completed',
-    },
-  ];
+  // 🧩 Fetch Data from API
+  const fetchData = async type => {
+    setLoading(true);
+    const token = localStorage.getItem('token'); // token from localStorage
+
+    try {
+      const url = type === 'pickup' ? PICKUP_API : AUTO_PICKUP_API;
+      const res = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (type === 'pickup') setPickupData(res.data || []);
+      else setAutoPickupData(res.data || []);
+    } catch (err) {
+      console.error(err);
+      if (type === 'pickup') setPickupData([]);
+      else setAutoPickupData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData(activeTab);
+  }, [activeTab]);
 
   return (
     <div className="bg-gray-50 min-h-screen ">
@@ -119,8 +115,6 @@ const Pickup = () => {
             <div className="relative">
               <select className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
                 <option>--- Select Merchant ---</option>
-                <option>ABC Store</option>
-                <option>XYZ Shop</option>
               </select>
               <FiChevronDown
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -128,7 +122,10 @@ const Pickup = () => {
               />
             </div>
 
-            <button className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-all duration-300 font-medium flex items-center gap-2 justify-center">
+            <button
+              onClick={() => fetchData(activeTab)}
+              className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-all duration-300 font-medium flex items-center gap-2 justify-center"
+            >
               <FiRefreshCcw size={16} />
               Load Data
             </button>
@@ -185,7 +182,9 @@ const Pickup = () => {
         </div>
 
         <div className="overflow-x-auto">
-          {activeTab === 'pickup' ? (
+          {loading ? (
+            <div className="text-center py-10 text-gray-500">Loading...</div>
+          ) : activeTab === 'pickup' ? (
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
@@ -213,21 +212,40 @@ const Pickup = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {pickupData.map((item, i) => (
-                  <tr key={item.id} className="hover:bg-gray-50 transition">
-                    <td className="px-6 py-4 text-sm">{i + 1}</td>
-                    <td className="px-6 py-4 text-sm">{item.date}</td>
-                    <td className="px-6 py-4 text-sm">{item.trackingId}</td>
-                    <td className="px-6 py-4 text-sm">{item.merchant}</td>
-                    <td className="px-6 py-4 text-sm">{item.customer}</td>
-                    <td className="px-6 py-4 text-sm">{item.address}</td>
-                    <td className="px-6 py-4 text-sm">
-                      <button className="text-blue-600 hover:underline">
-                        View
-                      </button>
+                {pickupData.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="text-center py-6 text-gray-500">
+                      No data found
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  pickupData.map((item, i) => (
+                    <tr
+                      key={item.tracking_id}
+                      className="hover:bg-gray-50 transition"
+                    >
+                      <td className="px-6 py-4 text-sm">{i + 1}</td>
+                      <td className="px-6 py-4 text-sm">
+                        {item.created_at?.slice(0, 10)}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-blue-600">
+                        {item.tracking_id}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        {item.merchant_name || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        {item.customer_name}
+                      </td>
+                      <td className="px-6 py-4 text-sm">{item.address}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <button className="text-blue-600 hover:underline">
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           ) : (
@@ -261,32 +279,51 @@ const Pickup = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {autoPickupData.map((item, i) => (
-                  <tr key={item.id} className="hover:bg-gray-50 transition">
-                    <td className="px-6 py-4 text-sm">{i + 1}</td>
-                    <td className="px-6 py-4 text-sm">{item.trackingId}</td>
-                    <td className="px-6 py-4 text-sm">{item.pickupDate}</td>
-                    <td className="px-6 py-4 text-sm">{item.pickupTime}</td>
-                    <td className="px-6 py-4 text-sm">{item.merchant}</td>
-                    <td className="px-6 py-4 text-sm">{item.type}</td>
-                    <td className="px-6 py-4 text-sm">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          item.status === 'Completed'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-yellow-100 text-yellow-700'
-                        }`}
-                      >
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <button className="text-blue-600 hover:underline">
-                        View
-                      </button>
+                {autoPickupData.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-6 text-gray-500">
+                      No data found
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  autoPickupData.map((item, i) => (
+                    <tr
+                      key={item.tracking_id}
+                      className="hover:bg-gray-50 transition"
+                    >
+                      <td className="px-6 py-4 text-sm">{i + 1}</td>
+                      <td className="px-6 py-4 text-sm text-blue-600">
+                        {item.tracking_id}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        {item.pickup_date || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        {item.pickup_time || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        {item.merchant_name || '-'}
+                      </td>
+                      <td className="px-6 py-4 text-sm">{item.type}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            item.status === 'Completed'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-yellow-100 text-yellow-700'
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <button className="text-blue-600 hover:underline">
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           )}
