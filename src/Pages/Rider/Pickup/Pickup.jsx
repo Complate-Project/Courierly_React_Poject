@@ -9,10 +9,13 @@ import {
   FiChevronDown,
 } from 'react-icons/fi';
 import useTitle from '../../../Hooks/useTitle';
+import Spinier from '../../../Shared/Spinier/Spinier';
 
 const PICKUP_API = 'https://courierly.demo-bd.com/api/rider-pickup-parcel-list';
 const AUTO_PICKUP_API =
   'https://courierly.demo-bd.com/api/rider-auto-pickup-parcel-list';
+
+const ITEMS_PER_PAGE = 8;
 
 const Pickup = () => {
   useTitle('Rider Dashboard | Pickup');
@@ -21,6 +24,7 @@ const Pickup = () => {
   const [pickupData, setPickupData] = useState([]);
   const [autoPickupData, setAutoPickupData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // 🧩 Fetch Data from API
   const fetchData = async type => {
@@ -47,8 +51,18 @@ const Pickup = () => {
   };
 
   useEffect(() => {
+    setCurrentPage(1);
     fetchData(activeTab);
   }, [activeTab]);
+
+  const activeData = activeTab === 'pickup' ? pickupData : autoPickupData;
+
+  const totalPages = Math.ceil(activeData.length / ITEMS_PER_PAGE);
+
+  const paginatedData = activeData.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
 
   return (
     <div className="bg-gray-50 min-h-screen ">
@@ -112,16 +126,6 @@ const Pickup = () => {
               />
             </div>
 
-            <div className="relative">
-              <select className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
-                <option>--- Select Merchant ---</option>
-              </select>
-              <FiChevronDown
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                size={16}
-              />
-            </div>
-
             <button
               onClick={() => fetchData(activeTab)}
               className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-all duration-300 font-medium flex items-center gap-2 justify-center"
@@ -142,6 +146,15 @@ const Pickup = () => {
                 type="text"
                 placeholder="Search orders..."
                 className="pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full lg:w-64"
+              />
+            </div>
+            <div className="relative">
+              <select className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                <option>--- Select Merchant ---</option>
+              </select>
+              <FiChevronDown
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={16}
               />
             </div>
 
@@ -183,149 +196,399 @@ const Pickup = () => {
 
         <div className="overflow-x-auto">
           {loading ? (
-            <div className="text-center py-10 text-gray-500">Loading...</div>
+            <Spinier></Spinier>
           ) : activeTab === 'pickup' ? (
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    SL.
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Create Date
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Tracking ID
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Merchant
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Customer
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Address
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {pickupData.length === 0 ? (
+            <>
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <td colSpan={7} className="text-center py-6 text-gray-500">
-                      No data found
-                    </td>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      SL.
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Create Date
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Tracking ID
+                    </th>
+
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Customer
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Phone
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Address
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
-                ) : (
-                  pickupData.map((item, i) => (
-                    <tr
-                      key={item.tracking_id}
-                      className="hover:bg-gray-50 transition"
-                    >
-                      <td className="px-6 py-4 text-sm">{i + 1}</td>
-                      <td className="px-6 py-4 text-sm">
-                        {item.created_at?.slice(0, 10)}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-blue-600">
-                        {item.tracking_id}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        {item.merchant_name || '-'}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        {item.customer_name}
-                      </td>
-                      <td className="px-6 py-4 text-sm">{item.address}</td>
-                      <td className="px-6 py-4 text-sm">
-                        <button className="text-blue-600 hover:underline">
-                          View
-                        </button>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {paginatedData.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        className="text-center py-6 text-gray-500"
+                      >
+                        No data found
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    paginatedData.map((item, i) => (
+                      <tr
+                        key={item.tracking_id}
+                        className="hover:bg-gray-50 transition"
+                      >
+                        <td className="px-6 py-4 text-sm">
+                          {(currentPage - 1) * ITEMS_PER_PAGE + i + 1}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          {item.created_at?.slice(0, 10)}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-blue-600">
+                          {item.tracking_id}
+                        </td>
+
+                        <td className="px-6 py-4 text-sm">
+                          {item.customer_name}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          {item.mobile || '-'}
+                        </td>
+                        <td className="px-6 py-4 text-sm">{item.address}</td>
+                        <td className="px-6 py-4 text-sm">
+                          <button className="text-blue-600 hover:underline">
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+              {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-gray-200 bg-gray-50/50">
+                  {/* Page info */}
+                  <div className="text-sm text-gray-600">
+                    Page{' '}
+                    <span className="font-semibold text-gray-900">
+                      {currentPage}
+                    </span>{' '}
+                    of{' '}
+                    <span className="font-semibold text-gray-900">
+                      {totalPages}
+                    </span>
+                  </div>
+
+                  {/* Pagination controls */}
+                  <div className="flex items-center gap-2">
+                    {/* Previous button */}
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(p => p - 1)}
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                      Previous
+                    </button>
+
+                    {/* Page numbers */}
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => {
+                        const pageNum = i + 1;
+                        const isCurrent = pageNum === currentPage;
+
+                        const shouldShow =
+                          pageNum === 1 ||
+                          pageNum === totalPages ||
+                          Math.abs(pageNum - currentPage) <= 1;
+
+                        if (!shouldShow) {
+                          if (
+                            pageNum === currentPage - 2 ||
+                            pageNum === currentPage + 2
+                          ) {
+                            return (
+                              <span
+                                key={`dots-${i}`}
+                                className="flex items-center justify-center h-10 px-3 text-gray-400 select-none"
+                              >
+                                •••
+                              </span>
+                            );
+                          }
+                          return null;
+                        }
+
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`
+          min-w-[2.5rem] h-10 px-2 text-sm font-medium rounded-lg transition-all duration-200
+          ${
+            isCurrent
+              ? 'bg-blue-600 text-white shadow-sm hover:bg-blue-700'
+              : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-400'
+          }
+        `}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Next button */}
+                    <button
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(p => p + 1)}
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow"
+                    >
+                      Next
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    SL.
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Tracking ID
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Pickup Date
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Pickup Time
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Merchant
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {autoPickupData.length === 0 ? (
+            <>
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <td colSpan={8} className="text-center py-6 text-gray-500">
-                      No data found
-                    </td>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      SL.
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Tracking ID
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Pickup Date
+                    </th>
+
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Name
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Phone
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Address
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
-                ) : (
-                  autoPickupData.map((item, i) => (
-                    <tr
-                      key={item.tracking_id}
-                      className="hover:bg-gray-50 transition"
-                    >
-                      <td className="px-6 py-4 text-sm">{i + 1}</td>
-                      <td className="px-6 py-4 text-sm text-blue-600">
-                        {item.tracking_id}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        {item.pickup_date || '-'}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        {item.pickup_time || '-'}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        {item.merchant_name || '-'}
-                      </td>
-                      <td className="px-6 py-4 text-sm">{item.type}</td>
-                      <td className="px-6 py-4 text-sm">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            item.status === 'Completed'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-yellow-100 text-yellow-700'
-                          }`}
-                        >
-                          {item.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <button className="text-blue-600 hover:underline">
-                          View
-                        </button>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {paginatedData.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={8}
+                        className="text-center py-6 text-gray-500"
+                      >
+                        No data found
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    paginatedData.map((item, i) => (
+                      <tr
+                        key={item.tracking_id}
+                        className="hover:bg-gray-50 transition"
+                      >
+                        <td className="px-6 py-4 text-sm">
+                          {(currentPage - 1) * ITEMS_PER_PAGE + i + 1}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-blue-600">
+                          {item.tracking_id}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          {item.pickup_date || '-'}
+                        </td>
+
+                        <td className="px-6 py-4 text-sm">
+                          {item.customer_name}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          {item.mobile || '-'}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          {item.customer_address || '-'}
+                        </td>
+
+                        <td className="px-6 py-4 text-sm">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              item.status === 'Completed'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-yellow-100 text-yellow-700'
+                            }`}
+                          >
+                            {item.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          <button className="text-blue-600 hover:underline">
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+
+              {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-gray-200 bg-gray-50/50">
+                  {/* Page info */}
+                  <div className="text-sm text-gray-600">
+                    Page{' '}
+                    <span className="font-semibold text-gray-900">
+                      {currentPage}
+                    </span>{' '}
+                    of{' '}
+                    <span className="font-semibold text-gray-900">
+                      {totalPages}
+                    </span>
+                  </div>
+
+                  {/* Pagination controls */}
+                  <div className="flex items-center gap-2">
+                    {/* Previous button */}
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(p => p - 1)}
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                      Previous
+                    </button>
+
+                    {/* Page numbers */}
+                    <div className="flex items-center gap-1">
+                      {[...Array(totalPages)].map((_, i) => {
+                        const pageNum = i + 1;
+                        const isCurrent = currentPage === pageNum;
+                        const isNearCurrent =
+                          Math.abs(currentPage - pageNum) <= 1;
+                        const isEdge = pageNum === 1 || pageNum === totalPages;
+
+                        // Show ellipsis for gaps in page numbers
+                        if (
+                          totalPages > 7 &&
+                          !isNearCurrent &&
+                          !isEdge &&
+                          pageNum !== 2 &&
+                          pageNum !== totalPages - 1
+                        ) {
+                          if (
+                            (currentPage <= 3 && pageNum === 4) ||
+                            (currentPage >= totalPages - 2 &&
+                              pageNum === totalPages - 3) ||
+                            (currentPage > 3 &&
+                              currentPage < totalPages - 2 &&
+                              (pageNum === currentPage - 2 ||
+                                pageNum === currentPage + 2))
+                          ) {
+                            return (
+                              <span
+                                key={`ellipsis-${i}`}
+                                className="px-2 text-gray-400"
+                              >
+                                ...
+                              </span>
+                            );
+                          }
+                          return null;
+                        }
+
+                        return (
+                          <button
+                            key={i}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`
+                min-w-[2.5rem] h-10 px-2 text-sm font-medium rounded-lg transition-all duration-200
+                ${
+                  isCurrent
+                    ? 'bg-blue-600 text-white shadow-sm hover:bg-blue-700'
+                    : 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 hover:border-gray-400'
+                }
+              `}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Next button */}
+                    <button
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(p => p + 1)}
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow"
+                    >
+                      Next
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
