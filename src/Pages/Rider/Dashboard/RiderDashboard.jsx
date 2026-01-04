@@ -1,63 +1,151 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   FiPackage,
   FiCheckCircle,
   FiClock,
   FiTruck,
   FiAlertCircle,
-  FiDollarSign,
   FiMap,
   FiUser,
+  FiRefreshCcw,
+  FiRepeat,
+  FiCalendar,
+  FiTrendingUp,
+  FiPercent,
 } from 'react-icons/fi';
 import useTitle from '../../../Hooks/useTitle';
+import axios from 'axios';
+import Spinier from '../../../Shared/Spinier/Spinier';
+import RiderProfile from '../Model/Profile/RiderProfile';
 
 const RiderDashboard = () => {
   useTitle('Rider Dashboard');
   const [timeRange, setTimeRange] = useState('today');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [data, setData] = useState({});
+  console.log(data);
+
+  const [loading, setLoading] = useState(true);
+
+  const fetchDashboardData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+
+      const res = await axios.get(
+        'https://courierly.demo-bd.com/api/rider-dashboard',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setData(res.data);
+    } catch (error) {
+      console.error('Dashboard fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
   const stats = [
     {
-      title: 'Total Assigned',
-      value: '24',
+      title: 'Today Pickup Request',
+      value: data?.today_pickup_request ?? 0,
       icon: <FiPackage className="w-6 h-6" />,
       color: 'bg-blue-500',
-      description: 'Packages assigned to you',
+      description: 'Total pickup requests today',
     },
     {
-      title: 'Pending Delivery',
-      value: '8',
-      icon: <FiClock className="w-6 h-6" />,
-      color: 'bg-yellow-500',
-      description: 'Awaiting pickup/delivery',
-    },
-    {
-      title: 'In Transit',
-      value: '6',
+      title: 'Today Delivery Request',
+      value: data?.today_delivery_request ?? 0,
       icon: <FiTruck className="w-6 h-6" />,
-      color: 'bg-orange-500',
-      description: 'Currently on route',
-    },
-    {
-      title: 'Delivered ',
-      value: '10',
-      icon: <FiCheckCircle className="w-6 h-6" />,
       color: 'bg-green-500',
-      description: 'Successful deliveries',
+      description: 'Delivery requests for today',
     },
     {
-      title: 'Failed Attempts',
-      value: '2',
-      icon: <FiAlertCircle className="w-6 h-6" />,
+      title: 'Today Return Request',
+      value: data?.today_return_requset ?? 0,
+      icon: <FiRefreshCcw className="w-6 h-6" />,
       color: 'bg-red-500',
-      description: 'Need reattempt',
+      description: 'Return requests today',
     },
     {
-      title: ' Earnings',
-      value: '$156',
-      icon: <FiDollarSign className="w-6 h-6" />,
+      title: 'Today Transfer Request',
+      value: data?.today_transfer_request ?? 0,
+      icon: <FiRepeat className="w-6 h-6" />,
       color: 'bg-purple-500',
-      description: 'Estimated income',
+      description: 'Transfer requests today',
+    },
+    {
+      title: 'Today Delivery',
+      value: data?.today_delivery ?? 0,
+      icon: <FiCheckCircle className="w-6 h-6" />,
+      color: 'bg-teal-500',
+      description: 'Completed deliveries today',
+    },
+    {
+      title: 'Monthly Delivery',
+      value: data?.monthly_delivered ?? 0,
+      icon: <FiCalendar className="w-6 h-6" />,
+      color: 'bg-indigo-500',
+      description: 'Deliveries this month',
+    },
+    {
+      title: 'Total Pickup Request',
+      value: data?.total_pickup_request ?? 0,
+      icon: <FiPackage className="w-6 h-6" />,
+      color: 'bg-blue-600',
+      description: 'All pickup requests',
+    },
+    {
+      title: 'Total Delivery Request',
+      value: data?.total_delivery_request ?? 0,
+      icon: <FiTruck className="w-6 h-6" />,
+      color: 'bg-green-600',
+      description: 'All delivery requests',
+    },
+    {
+      title: 'Total Return Request',
+      value: data?.total_return ?? 0,
+      icon: <FiAlertCircle className="w-6 h-6" />,
+      color: 'bg-red-600',
+      description: 'All return requests',
+    },
+    {
+      title: 'Total Transfer Request',
+      value: data?.total_transfer_request ?? 0,
+      icon: <FiRepeat className="w-6 h-6" />,
+      color: 'bg-purple-600',
+      description: 'All transfer requests',
+    },
+    {
+      title: 'Pickup Collect Ratio',
+      value: data?.pickUp_collect_ratio
+        ? `${data.pickUp_collect_ratio}%`
+        : '0%',
+      icon: <FiTrendingUp className="w-6 h-6" />,
+      color: 'bg-orange-500',
+      description: 'Pickup success ratio',
+    },
+    {
+      title: 'Success Delivery Ratio',
+      value: data?.success_delivery_ratio
+        ? `${data.success_delivery_ratio}%`
+        : '0%',
+      icon: <FiPercent className="w-6 h-6" />,
+      color: 'bg-gray-500',
+      description: 'Delivery success ratio',
     },
   ];
+
+  if (loading) {
+    return <Spinier></Spinier>;
+  }
 
   return (
     <div className="min-h-[calc(100vh-220px)] ">
@@ -92,7 +180,6 @@ const RiderDashboard = () => {
           </div>
         </div>
       </div>
-
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         {stats.map((stat, index) => (
@@ -117,7 +204,6 @@ const RiderDashboard = () => {
           </div>
         ))}
       </div>
-
       {/* Quick Actions */}
       <div className="bg-bg rounded-md shadow-sm border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-text-main mb-4">
@@ -132,7 +218,10 @@ const RiderDashboard = () => {
             <FiPackage className="w-5 h-5 text-green-600" />
             <span className="font-medium text-green-700">Start Delivery</span>
           </button>
-          <button className="flex items-center justify-center space-x-2 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center justify-center space-x-2 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors"
+          >
             <FiUser className="w-5 h-5 text-purple-600" />
             <span className="font-medium text-purple-700">My Profile</span>
           </button>
@@ -144,20 +233,12 @@ const RiderDashboard = () => {
           </button>
         </div>
       </div>
-
-      {/* Today's Priority
-      <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-        <div className="flex items-center">
-          <FiAlertCircle className="w-5 h-5 text-yellow-600 mr-2" />
-          <h3 className="text-sm font-medium text-yellow-800">
-            Today's Priority
-          </h3>
-        </div>
-        <p className="text-sm text-yellow-700 mt-1">
-          You have 3 express deliveries that need to be completed within the
-          next 2 hours.
-        </p>
-      </div> */}
+      {/* Modal */}
+      <RiderProfile
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="My Profile"
+      ></RiderProfile>
     </div>
   );
 };

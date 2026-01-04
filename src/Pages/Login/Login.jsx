@@ -2,16 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../Hooks/useAuth';
 import {
-  FiUser,
   FiLock,
   FiMail,
   FiAlertCircle,
   FiLoader,
   FiEye,
   FiEyeOff,
-  FiHelpCircle,
   FiShield,
 } from 'react-icons/fi';
+import useTitle from '../../Hooks/useTitle';
 
 const ROLE_MAP = {
   10: 'rider',
@@ -20,6 +19,7 @@ const ROLE_MAP = {
 };
 
 const Login = () => {
+  useTitle('Dashboard login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

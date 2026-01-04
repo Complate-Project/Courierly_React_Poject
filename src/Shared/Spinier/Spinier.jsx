@@ -1,8 +1,8 @@
 import React from 'react';
 
-export default function Spinier() {
+export default function Spinner() {
   return (
-    <div className="flex flex-col items-center justify-center py-12 space-y-4">
+    <div className="fixed inset-0 flex items-center justify-center  z-50">
       <div className="relative">
         <div className="w-14 h-14 rounded-full animate-spin border-4 border-dashed border-blue-500 border-t-transparent"></div>
         <div
