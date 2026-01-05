@@ -1,7 +1,10 @@
 import React from 'react';
+import { useAuth } from '../../../../Hooks/useAuth';
 
 const RiderProfile = ({ isOpen, onClose, rider, title = 'Rider Profile' }) => {
   if (!isOpen) return null;
+   const { user, userRole } = useAuth();
+   console.log(user,userRole)
 
   // Sample rider data - in real app, this would come from props
   const riderData = rider || {
@@ -9,13 +12,13 @@ const RiderProfile = ({ isOpen, onClose, rider, title = 'Rider Profile' }) => {
     email: 'rider@.com',
     phone: '01770406534',
     rating: 4.8,
-    totalRides: 342,
+    totalDelivery: 342,
     memberSince: 'Jan 2022',
     vehicleType: 'Motorcycle',
     vehicleNumber: 'ABC-123',
     status: 'Available',
     profileImage:
-      'https://img.freepik.com/premium-vector/cheerful-delivery-rider-scootera-playful-vector-cartoon-illustration-food-service_1318202-55.jpg',
+      '',
   };
 
   return (
@@ -40,7 +43,7 @@ const RiderProfile = ({ isOpen, onClose, rider, title = 'Rider Profile' }) => {
           <div className="flex items-center mt-6">
             <div className="relative">
               <img
-                src={riderData.profileImage}
+                src={user.photo || 'https://img.freepik.com/premium-vector/cheerful-delivery-rider-scootera-playful-vector-cartoon-illustration-food-service_1318202-55.jpg'}
                 alt={riderData.name}
                 className="w-20 h-20 rounded-full border-4 border-white shadow-lg"
               />
@@ -53,7 +56,7 @@ const RiderProfile = ({ isOpen, onClose, rider, title = 'Rider Profile' }) => {
               />
             </div>
             <div className="ml-4">
-              <h3 className="text-xl font-bold text-white">{riderData.name}</h3>
+              <h3 className="text-xl font-bold text-white">{user.name}</h3>
               <div className="flex items-center mt-1">
                 <span className="text-yellow-300 text-lg">★</span>
                 <span className="text-white ml-1 font-semibold">
@@ -73,9 +76,9 @@ const RiderProfile = ({ isOpen, onClose, rider, title = 'Rider Profile' }) => {
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="text-center p-3 bg-blue-50 rounded-xl">
               <div className="text-2xl font-bold text-blue-700">
-                {riderData.totalRides}
+                {riderData.totalDelivery}
               </div>
-              <div className="text-sm text-gray-600">Total Rides</div>
+              <div className="text-sm text-gray-600">Total Delivery</div>
             </div>
             <div className="text-center p-3 bg-green-50 rounded-xl">
               <div className="text-2xl font-bold text-green-700">
@@ -103,7 +106,7 @@ const RiderProfile = ({ isOpen, onClose, rider, title = 'Rider Profile' }) => {
               </div>
               <div>
                 <div className="text-sm text-gray-500">Email</div>
-                <div className="font-medium">{riderData.email}</div>
+                <div className="font-medium">{user.email}</div>
               </div>
             </div>
 
@@ -113,7 +116,7 @@ const RiderProfile = ({ isOpen, onClose, rider, title = 'Rider Profile' }) => {
               </div>
               <div>
                 <div className="text-sm text-gray-500">Phone</div>
-                <div className="font-medium">{riderData.phone}</div>
+                <div className="font-medium">{user.phone}</div>
               </div>
             </div>
 

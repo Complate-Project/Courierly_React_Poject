@@ -66,11 +66,31 @@ const Login = () => {
       const roleNumber = data.user.role;
       const role = ROLE_MAP[roleNumber];
 
+     
+
+
+
+
       if (!role) {
         throw new Error('Invalid user role. Please contact support.');
       }
 
-      login(token, role);
+      const safeUser = {
+         id: data.user.id,
+         name: data.user.name,
+         email: data.user.email,
+         phone:data.user.mobile,
+         address:data.user.address,
+         role: data.user.role,
+         photo: data.user.photo,
+    };
+
+    console.log(data.user)
+
+
+
+     login(token, role,  safeUser)
+
 
       if (rememberMe) {
         localStorage.setItem('rememberedEmail', email);

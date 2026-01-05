@@ -16,14 +16,13 @@ import {
 import useTitle from '../../../Hooks/useTitle';
 import axios from 'axios';
 import Spinier from '../../../Shared/Spinier/Spinier';
-import RiderProfile from '../Model/Profile/RiderProfile';
+import RiderProfile from '../../../Components/Rider/Model/Profile/RiderProfile';
 
 const RiderDashboard = () => {
   useTitle('Rider Dashboard');
   const [timeRange, setTimeRange] = useState('today');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [data, setData] = useState({});
-  console.log(data);
 
   const [loading, setLoading] = useState(true);
 
