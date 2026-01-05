@@ -19,7 +19,7 @@ const ROLE_MAP = {
 };
 
 const Login = () => {
-  useTitle('Dashboard login');
+  useTitle(' login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
