@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FiRefreshCcw,
   FiList,
@@ -11,73 +11,62 @@ import {
   FiPackage,
   FiCornerUpLeft,
 } from 'react-icons/fi';
+import axios from 'axios';
+import Spinner from '../../../Shared/Spinier/Spinier';
 
 const RiderDeliveryParcel = () => {
   const [isGridView, setIsGridView] = useState(false);
+  const [tableData, setTableData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Fake data for the table
-  const tableData = [
-    {
-      id: 1,
-      trackingId: 'TRK123456',
-      merchantName: 'ABC Store',
-      merchantPhone: '+8801712345678',
-      customerName: 'John Doe',
-      customerNumber: '+8801812345678',
-      customerAddress: '123 Main St, Dhaka',
-      type: 'Express',
-      partial: 'No',
-      invoiceValue: '৳1,250',
-    },
-    {
-      id: 2,
-      trackingId: 'TRK123457',
-      merchantName: 'XYZ Shop',
-      merchantPhone: '+8801723456789',
-      customerName: 'Jane Smith',
-      customerNumber: '+8801823456789',
-      customerAddress: '456 Oak Ave, Chittagong',
-      type: 'Standard',
-      partial: 'Yes',
-      invoiceValue: '৳2,800',
-    },
-    {
-      id: 3,
-      trackingId: 'TRK123458',
-      merchantName: 'Super Mart',
-      merchantPhone: '+8801734567890',
-      customerName: 'Mike Johnson',
-      customerNumber: '+8801834567890',
-      customerAddress: '789 Pine Rd, Sylhet',
-      type: 'Express',
-      partial: 'No',
-      invoiceValue: '৳3,500',
-    },
-    {
-      id: 4,
-      trackingId: 'TRK123459',
-      merchantName: 'Best Buy',
-      merchantPhone: '+8801745678901',
-      customerName: 'Sarah Wilson',
-      customerNumber: '+8801845678901',
-      customerAddress: '321 Elm St, Khulna',
-      type: 'Standard',
-      partial: 'No',
-      invoiceValue: '৳1,750',
-    },
-    {
-      id: 5,
-      trackingId: 'TRK123460',
-      merchantName: 'Tech World',
-      merchantPhone: '+8801756789012',
-      customerName: 'David Brown',
-      customerNumber: '+8801856789012',
-      customerAddress: '654 Maple Dr, Rajshahi',
-      type: 'Express',
-      partial: 'Yes',
-      invoiceValue: '৳4,200',
-    },
-  ];
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(8);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+
+        const response = await axios.get(
+          'https://courierly.demo-bd.com/api/delivery-parcel-list',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const mappedData = response.data.map((item) => ({
+          id: item.id,
+          trackingId: item.tracking_id,
+          merchantName: item.shop,
+          merchantPhone: item.mobile,
+          customerName: item.customer_name,
+          customerNumber: item.customer_phone,
+          customerAddress: item.customer_address,
+          type: item.type,
+          partial: item.isPartial === 1 ? 'Yes' : 'No',
+          invoiceValue: `৳${item.collection}`,
+        }));
+
+        setTableData(mappedData);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching delivery parcels:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Calculate Pagination
+  const totalPages = Math.ceil(tableData.length / itemsPerPage);
+  const paginatedData = tableData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Mobile Card View
   const MobileCard = ({ item, index }) => (
@@ -121,7 +110,6 @@ const RiderDeliveryParcel = () => {
         </div>
       </div>
 
-      {/* Action Buttons for Mobile */}
       <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-200">
         <button className="flex-1 min-w-[120px] bg-green-600 text-white px-3 py-2 rounded text-xs hover:bg-green-700 transition-colors duration-200 flex items-center justify-center gap-1">
           <FiTruck size={12} />
@@ -191,9 +179,7 @@ const RiderDeliveryParcel = () => {
               <button
                 onClick={() => setIsGridView(false)}
                 className={`p-2 rounded-md transition-all duration-300 ${
-                  !isGridView
-                    ? 'bg-white shadow-sm'
-                    : 'hover:bg-white hover:shadow-sm'
+                  !isGridView ? 'bg-white shadow-sm' : 'hover:bg-white hover:shadow-sm'
                 }`}
               >
                 <FiList
@@ -204,9 +190,7 @@ const RiderDeliveryParcel = () => {
               <button
                 onClick={() => setIsGridView(true)}
                 className={`p-2 rounded-md transition-all duration-300 ${
-                  isGridView
-                    ? 'bg-white shadow-sm'
-                    : 'hover:bg-white hover:shadow-sm'
+                  isGridView ? 'bg-white shadow-sm' : 'hover:bg-white hover:shadow-sm'
                 }`}
               >
                 <FiGrid
@@ -233,7 +217,7 @@ const RiderDeliveryParcel = () => {
               Delivery Parcels ({tableData.length})
             </h2>
           </div>
-          {tableData.map((item, index) => (
+          {paginatedData.map((item, index) => (
             <MobileCard key={item.id} item={item} index={index} />
           ))}
         </div>
@@ -242,167 +226,304 @@ const RiderDeliveryParcel = () => {
       {/* Tablet and Desktop Table View */}
       <div className={`${isGridView ? 'hidden md:block' : 'block'}`}>
         <div className="bg-white rounded-b-lg shadow-sm border border-gray-200 overflow-hidden">
-          {/* Table Header */}
-          <div className="px-4 md:px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              Delivery Parcel List
-              <span className="text-sm font-normal text-gray-500">
-                ({tableData.length} orders)
-              </span>
-            </h2>
-          </div>
+          {loading ? (
+            <Spinner />
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[1000px] lg:min-w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        SL.
+                      </th>
+                      <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Tracking ID
+                      </th>
+                      <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Merchant
+                      </th>
+                      <th className="hidden lg:table-cell px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Merchant Phone
+                      </th>
+                      <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Customer
+                      </th>
+                      <th className="hidden xl:table-cell px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Customer Phone
+                      </th>
+                      <th className="hidden 2xl:table-cell px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Address
+                      </th>
+                      <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="hidden md:table-cell px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Partial
+                      </th>
+                      <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Invoice
+                      </th>
+                      <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
 
-          {/* Table Container */}
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1000px] lg:min-w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    SL.
-                  </th>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Tracking ID
-                  </th>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Merchant
-                  </th>
-                  <th className="hidden lg:table-cell px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Merchant Phone
-                  </th>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Customer
-                  </th>
-                  <th className="hidden xl:table-cell px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Customer Phone
-                  </th>
-                  <th className="hidden 2xl:table-cell px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Address
-                  </th>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th className="hidden md:table-cell px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Partial
-                  </th>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Invoice
-                  </th>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-
-              {/* Table Body */}
-              <tbody className="bg-white divide-y divide-gray-200">
-                {tableData.map((item, index) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-gray-50 transition-colors duration-200"
-                  >
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {index + 1}
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
-                      {item.trackingId}
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div>
-                        <div className="font-medium">{item.merchantName}</div>
-                        <div className="text-gray-500 text-xs lg:hidden">
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {paginatedData.map((item, index) => (
+                      <tr
+                        key={item.id}
+                        className="hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {(currentPage - 1) * itemsPerPage + index + 1}
+                        </td>
+                        <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+                          {item.trackingId}
+                        </td>
+                        <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <div>
+                            <div className="font-medium">{item.merchantName}</div>
+                            <div className="text-gray-500 text-xs lg:hidden">
+                              {item.merchantPhone}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="hidden lg:table-cell px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {item.merchantPhone}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="hidden lg:table-cell px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {item.merchantPhone}
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div>
-                        <div className="font-medium">{item.customerName}</div>
-                        <div className="text-gray-500 text-xs xl:hidden">
+                        </td>
+                        <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <div>
+                            <div className="font-medium">{item.customerName}</div>
+                            <div className="text-gray-500 text-xs xl:hidden">
+                              {item.customerNumber}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="hidden xl:table-cell px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {item.customerNumber}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="hidden xl:table-cell px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {item.customerNumber}
-                    </td>
-                    <td className="hidden 2xl:table-cell px-4 md:px-6 py-4 text-sm text-gray-900">
-                      <div
-                        className="max-w-xs truncate"
-                        title={item.customerAddress}
-                      >
-                        {item.customerAddress}
-                      </div>
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          item.type === 'Express'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-green-100 text-green-800'
-                        }`}
-                      >
-                        {item.type}
-                      </span>
-                    </td>
-                    <td className="hidden md:table-cell px-4 md:px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          item.partial === 'Yes'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
-                        {item.partial}
-                      </span>
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                      {item.invoiceValue}
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-wrap gap-1">
-                        <button className="bg-green-600 text-white px-2 py-1.5 rounded text-xs hover:bg-green-700 transition-colors duration-200 flex items-center gap-1">
-                          <FiTruck size={10} />
-                          <span className="hidden sm:inline">Deliver</span>
-                        </button>
-                        <button className="bg-blue-600 text-white px-2 py-1.5 rounded text-xs hover:bg-blue-700 transition-colors duration-200 flex items-center gap-1">
-                          <FiCalendar size={10} />
-                          <span className="hidden sm:inline">Reschedule</span>
-                        </button>
-                        <button className="bg-yellow-600 text-white px-2 py-1.5 rounded text-xs hover:bg-yellow-700 transition-colors duration-200 flex items-center gap-1">
-                          <FiPackage size={10} />
-                          <span className="hidden sm:inline">Partial</span>
-                        </button>
-                        <button className="bg-red-600 text-white px-2 py-1.5 rounded text-xs hover:bg-red-700 transition-colors duration-200 flex items-center gap-1">
-                          <FiCornerUpLeft size={10} />
-                          <span className="hidden sm:inline">Return</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                        </td>
+                        <td className="hidden 2xl:table-cell px-4 md:px-6 py-4 text-sm text-gray-900">
+                          <div
+                            className="max-w-xs truncate"
+                            title={item.customerAddress}
+                          >
+                            {item.customerAddress}
+                          </div>
+                        </td>
+                        <td className="px-4 md:px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              item.type === 'Express'
+                                ? 'bg-red-100 text-red-800'
+                                : 'bg-green-100 text-green-800'
+                            }`}
+                          >
+                            {item.type}
+                          </span>
+                        </td>
+                        <td className="hidden md:table-cell px-4 md:px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              item.partial === 'Yes'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}
+                          >
+                            {item.partial}
+                          </span>
+                        </td>
+                        <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                          {item.invoiceValue}
+                        </td>
+                        <td className="px-4 md:px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-wrap gap-1">
+                            <button className="bg-green-600 text-white px-2 py-1.5 rounded text-xs hover:bg-green-700 transition-colors duration-200 flex items-center gap-1">
+                              <FiTruck size={10} />
+                              <span className="hidden sm:inline">Deliver</span>
+                            </button>
+                            <button className="bg-blue-600 text-white px-2 py-1.5 rounded text-xs hover:bg-blue-700 transition-colors duration-200 flex items-center gap-1">
+                              <FiCalendar size={10} />
+                              <span className="hidden sm:inline">Reschedule</span>
+                            </button>
+                            <button className="bg-yellow-600 text-white px-2 py-1.5 rounded text-xs hover:bg-yellow-700 transition-colors duration-200 flex items-center gap-1">
+                              <FiPackage size={10} />
+                              <span className="hidden sm:inline">Partial</span>
+                            </button>
+                            <button className="bg-red-600 text-white px-2 py-1.5 rounded text-xs hover:bg-red-700 transition-colors duration-200 flex items-center gap-1">
+                              <FiCornerUpLeft size={10} />
+                              <span className="hidden sm:inline">Return</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-          {/* Table Footer */}
-          <div className="px-4 md:px-6 py-4 border-t border-gray-200 bg-gray-50">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-600">
-              <div>
-                Showing {tableData.length} of {tableData.length} entries
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="hidden sm:inline">Rows per page:</span>
-                <select className="bg-white border border-gray-300 rounded px-2 py-1 text-sm">
-                  <option>10</option>
-                  <option>25</option>
-                  <option>50</option>
-                </select>
-              </div>
-            </div>
-          </div>
+              {/* Table Footer with Pagination */}
+            <div className="px-4 md:px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-700">
+  {/* Entries info */}
+  <div className="text-gray-600">
+    Showing <span className="font-medium text-gray-900">{paginatedData.length}</span> of{" "}
+    <span className="font-medium text-gray-900">{tableData.length}</span>{" "}
+    {tableData.length === 1 ? "entry" : "entries"}
+  </div>
+
+  {/* Controls container */}
+  <div className="flex flex-col sm:flex-row items-center gap-4">
+    {/* Rows per page */}
+    <div className="flex items-center gap-2">
+      <span className="text-gray-600 whitespace-nowrap">Rows per page:</span>
+      <select
+        className="bg-white border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-colors hover:border-gray-400"
+        value={itemsPerPage}
+        onChange={(e) => {
+          const value = e.target.value === "All" ? tableData.length : parseInt(e.target.value);
+          setItemsPerPage(value);
+          setCurrentPage(1);
+        }}
+        aria-label="Select rows per page"
+      >
+        <option value={8}>8</option>
+        <option value={10}>10</option>
+        <option value={25}>25</option>
+        <option value={50}>50</option>
+        <option value="All">All</option>
+      </select>
+    </div>
+
+    {/* Divider (hidden on mobile) */}
+    <div className="hidden sm:block h-6 w-px bg-gray-300" />
+
+    {/* Pagination */}
+    <div className="flex items-center gap-2">
+      {/* Page info */}
+   
+
+{/* Pagination Buttons with truncation */}
+<div className="flex items-center gap-2 flex-wrap">
+  {/* Previous Button */}
+  <button
+    disabled={currentPage === 1}
+    onClick={() => setCurrentPage(p => p - 1)}
+    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow active:scale-95"
+  >
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+    </svg>
+    Previous
+  </button>
+
+  {/* Page Numbers */}
+  <div className="flex items-center gap-1">
+    {/* Always show page 1 */}
+    <button
+      onClick={() => setCurrentPage(1)}
+      className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
+        currentPage === 1
+          ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+          : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow"
+      }`}
+    >
+      1
+    </button>
+
+    {/* Show page 2 if it exists */}
+    {totalPages >= 2 && (
+      <button
+        onClick={() => setCurrentPage(2)}
+        className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
+          currentPage === 2
+            ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow"
+        }`}
+      >
+        2
+      </button>
+    )}
+
+    {/* Dynamic page numbers with ellipsis */}
+    {(() => {
+      const pages = [];
+      const showEllipsisStart = currentPage > 3;
+      const showEllipsisEnd = currentPage < totalPages - 2;
+
+      if (showEllipsisStart) {
+        pages.push(
+          <span key="ellipsis-start" className="px-2 text-gray-400">
+            ...
+          </span>
+        );
+      }
+
+      // Show current page and nearby pages
+      for (let i = Math.max(3, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+        if (i > 2 && i < totalPages) {
+          pages.push(
+            <button
+              key={i}
+              onClick={() => setCurrentPage(i)}
+              className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
+                currentPage === i
+                  ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow"
+              }`}
+            >
+              {i}
+            </button>
+          );
+        }
+      }
+
+      if (showEllipsisEnd) {
+        pages.push(
+          <span key="ellipsis-end" className="px-2 text-gray-400">
+            ...
+          </span>
+        );
+      }
+
+      return pages;
+    })()}
+
+    {/* Show last page if there are more than 1 page */}
+    {totalPages > 2 && (
+      <button
+        onClick={() => setCurrentPage(totalPages)}
+        className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
+          currentPage === totalPages
+            ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow"
+        }`}
+      >
+        {totalPages}
+      </button>
+    )}
+  </div>
+
+  {/* Next Button */}
+  <button
+    disabled={currentPage === totalPages}
+    onClick={() => setCurrentPage(p => p + 1)}
+    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow active:scale-95"
+  >
+    Next
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+    </svg>
+  </button>
+</div>
+
+
+
+    </div>
+  </div>
+</div>
+            </>
+          )}
         </div>
       </div>
     </div>
