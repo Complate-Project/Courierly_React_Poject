@@ -43,11 +43,7 @@ const RiderSidebar = ({ isOpen, toggleSidebar, logout }) => {
       icon: <FiTruck className="w-5 h-5" />,
       path: '/rider/delivery-parcel',
     },
-    {
-      name: 'Reschedule Order',
-      icon: <FiRefreshCw className="w-5 h-5" />,
-      path: '/rider/reschedule-order',
-    },
+   
     {
       name: 'Transfer Order',
       icon: <FiTrello className="w-5 h-5" />,
@@ -57,6 +53,11 @@ const RiderSidebar = ({ isOpen, toggleSidebar, logout }) => {
       name: 'Return Parcel',
       icon: <FiPackage className="w-5 h-5" />,
       path: '/rider/return-parcel',
+    },
+     {
+      name: 'Reschedule Order',
+      icon: <FiRefreshCw className="w-5 h-5" />,
+      path: '/rider/reschedule-order',
     },
     {
       name: 'Report',

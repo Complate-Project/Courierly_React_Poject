@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import {
   FiRefreshCcw,
   FiList,
@@ -9,123 +10,54 @@ import {
   FiDownload,
   FiCalendar,
 } from 'react-icons/fi';
+import Spinner from '../../../Shared/Spinier/Spinier';
 
 const ParcelHistory = () => {
-  const [isGridView, setIsGridView] = useState(false);
+   const [tableData, setTableData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // Fake data matching the image
-  const tableData = [
-    {
-      id: 1,
-      trackingId: 'CL010562421',
-      pickupDate: '16-07-2024',
-      merchantName: 'Test Business',
-      customerName: 'Monir',
-      customerPhone: '1710000018',
-      customerAddress: 'Banan, Dhaka',
-      invoiceValue: '1000',
-      type: 'Regular',
-    },
-    {
-      id: 2,
-      trackingId: 'CL010562419',
-      pickupDate: '16-07-2024',
-      merchantName: 'Test Business',
-      customerName: 'Monir',
-      customerPhone: '1710000016',
-      customerAddress: 'Banan, Dhaka',
-      invoiceValue: '1000',
-      type: 'Regular',
-    },
-    {
-      id: 3,
-      trackingId: 'CL010562418',
-      pickupDate: '16-07-2024',
-      merchantName: 'Test Business',
-      customerName: 'Monir',
-      customerPhone: '1710000015',
-      customerAddress: 'Banan, Dhaka',
-      invoiceValue: '1000',
-      type: 'Regular',
-    },
-    {
-      id: 4,
-      trackingId: 'CL010562411',
-      pickupDate: '18-07-2024',
-      merchantName: 'Test Business',
-      customerName: 'Monir',
-      customerPhone: '1710000028',
-      customerAddress: 'Banan, Dhaka',
-      invoiceValue: '1000',
-      type: 'Regular',
-    },
-    {
-      id: 5,
-      trackingId: 'CL010562413',
-      pickupDate: '26-07-2024',
-      merchantName: 'Test Business',
-      customerName: 'Monir',
-      customerPhone: '1710000010',
-      customerAddress: 'Banan, Dhaka',
-      invoiceValue: '1000',
-      type: 'Regular',
-    },
-    {
-      id: 6,
-      trackingId: 'CL010562415',
-      pickupDate: '31-07-2024',
-      merchantName: 'Test Business',
-      customerName: 'Monir',
-      customerPhone: '1710000012',
-      customerAddress: 'Banan, Dhaka',
-      invoiceValue: '1000',
-      type: 'Regular',
-    },
-    {
-      id: 7,
-      trackingId: 'CL010562428',
-      pickupDate: '18-08-2024',
-      merchantName: 'Test Business',
-      customerName: 'M Test',
-      customerPhone: '01700000000',
-      customerAddress: 'Address house road area',
-      invoiceValue: '1000',
-      type: 'Regular',
-    },
-    {
-      id: 8,
-      trackingId: 'CL010562414',
-      pickupDate: '24-08-2024',
-      merchantName: 'Test Business',
-      customerName: 'Monir',
-      customerPhone: '1710000011',
-      customerAddress: 'Banan, Dhaka',
-      invoiceValue: '1000',
-      type: 'Regular',
-    },
-    {
-      id: 9,
-      trackingId: 'CL010562420',
-      pickupDate: '24-08-2024',
-      merchantName: 'Test Business',
-      customerName: 'Monir',
-      customerPhone: '1710000017',
-      customerAddress: 'Banan, Dhaka',
-      invoiceValue: '1000',
-      type: 'Regular',
-    },
-    {
-      id: 10,
-      trackingId: 'CL010562416',
-      pickupDate: '24-08-2024',
-      merchantName: 'Test Business',
-      customerName: 'Monir',
-      customerPhone: '1710000013',
-      customerAddress: 'Banan, Dhaka',
-      invoiceValue: '1000',
-      type: 'Regular',
-    },
-  ];
+const token = localStorage.getItem('token'); // get token from localStorage
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get(
+          'https://courierly.demo-bd.com/api/parcel-history',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        // Map API response to tableData structure
+        const mappedData = res.data.map((item) => ({
+          id: item.id,
+          trackingId: item.tracking_id,
+          pickupDate: item.pickup_date
+            ? item.pickup_date
+            : item.created_at.split('T')[0], // fallback to created_at
+          merchantName: item.business_name || 'N/A',
+          customerName: item.customer_name,
+          customerPhone: item.customer_phone,
+          customerAddress: item.customer_address,
+          invoiceValue: item.selling_price,
+          type: item.type,
+          status: item.status,
+        }));
+
+        setTableData(mappedData);
+      } catch (error) {
+        console.error('Parcel History API Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [token]);
 
   return (
     <div className="">
@@ -230,7 +162,7 @@ const ParcelHistory = () => {
 
       {/* Table Section */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        {/* Table Container */}
+      {loading?<Spinner></Spinner>:(<>  {/* Table Container */}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
@@ -319,7 +251,7 @@ const ParcelHistory = () => {
               <span>rows per page</span>
             </div>
           </div>
-        </div>
+        </div></>)}
       </div>
     </div>
   );

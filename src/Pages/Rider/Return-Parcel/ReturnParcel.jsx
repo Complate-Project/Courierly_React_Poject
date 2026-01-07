@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+
 import {
   FiRefreshCcw,
   FiList,
@@ -16,101 +18,50 @@ import {
   FiMapPin,
   FiPhone,
 } from 'react-icons/fi';
+import Spinner from '../../../Shared/Spinier/Spinier';
 
 const ReturnParcel = () => {
   const [isGridView, setIsGridView] = useState(false);
+  const [tableData, setTableData] = useState([]);
+  const [loading, setLoading] = useState(false); // ✅ loading state
+  const token = localStorage.getItem('token');
 
-  // Fake data for the table
-  const tableData = [
-    {
-      id: 1,
-      createDate: '2024-01-15',
-      invoiceNo: 'RTN-001',
-      merchantName: 'ABC Store',
-      merchantPhone: '+8801712345678',
-      merchantAddress: '123 Shop Street, Dhaka',
-      riderName: 'John Rider',
-      createBy: 'System Auto',
-      status: 'Pending',
-    },
-    {
-      id: 2,
-      createDate: '2024-01-15',
-      invoiceNo: 'RTN-002',
-      merchantName: 'XYZ Shop',
-      merchantPhone: '+8801723456789',
-      merchantAddress: '456 Market Road, Chittagong',
-      riderName: 'Sarah Ahmed',
-      createBy: 'Admin User',
-      status: 'In Transit',
-    },
-    {
-      id: 3,
-      createDate: '2024-01-14',
-      invoiceNo: 'RTN-003',
-      merchantName: 'Super Mart',
-      merchantPhone: '+8801734567890',
-      merchantAddress: '789 Commercial Area, Sylhet',
-      riderName: 'David Khan',
-      createBy: 'System Auto',
-      status: 'Completed',
-    },
-    {
-      id: 4,
-      createDate: '2024-01-14',
-      invoiceNo: 'RTN-004',
-      merchantName: 'Best Buy',
-      merchantPhone: '+8801745678901',
-      merchantAddress: '321 Business Center, Khulna',
-      riderName: 'Lisa Rahman',
-      createBy: 'Manager',
-      status: 'Cancelled',
-    },
-    {
-      id: 5,
-      createDate: '2024-01-13',
-      invoiceNo: 'RTN-005',
-      merchantName: 'Tech World',
-      merchantPhone: '+8801756789012',
-      merchantAddress: '654 Tech Park, Rajshahi',
-      riderName: 'Mike Hossain',
-      createBy: 'System Auto',
-      status: 'Pending',
-    },
-    {
-      id: 6,
-      createDate: '2024-01-13',
-      invoiceNo: 'RTN-006',
-      merchantName: 'Fashion Hub',
-      merchantPhone: '+8801767890123',
-      merchantAddress: '987 Fashion Street, Bogura',
-      riderName: 'Anna Islam',
-      createBy: 'Admin User',
-      status: 'In Transit',
-    },
-    {
-      id: 7,
-      createDate: '2024-01-12',
-      invoiceNo: 'RTN-007',
-      merchantName: 'Home Decor',
-      merchantPhone: '+8801778901234',
-      merchantAddress: '234 Design Road, Rangpur',
-      riderName: 'Robert Ali',
-      createBy: 'System Auto',
-      status: 'Completed',
-    },
-    {
-      id: 8,
-      createDate: '2024-01-12',
-      invoiceNo: 'RTN-008',
-      merchantName: 'Gadget Store',
-      merchantPhone: '+8801789012345',
-      merchantAddress: '567 Electronics Zone, Barisal',
-      riderName: 'Maria Khan',
-      createBy: 'Manager',
-      status: 'Pending',
-    },
-  ];
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true); // ✅ start loading
+    try {
+      const res = await axios.get(
+        'https://courierly.demo-bd.com/api/return-parcel-list',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const apiData = res.data?.payments_data || [];
+
+      const mappedData = apiData.map(item => ({
+        id: item.id,
+        createDate: item.created_at ? item.created_at.split('T')[0] : 'N/A',
+        invoiceNo: item.invoice_id || 'N/A',
+        merchantName: item.merchant?.name || 'N/A',
+        merchantPhone: item.merchant?.mobile || 'N/A',
+        merchantAddress: item.merchant?.address || 'N/A',
+        riderName: item.rider?.name || 'N/A',
+        createBy: item.creator?.name || 'N/A',
+        status: item.status || 'Pending',
+      }));
+
+      setTableData(mappedData);
+    } catch (error) {
+      console.error('Return Parcel API Error:', error);
+    } finally {
+      setLoading(false); // ✅ stop loading
+    }
+  };
 
   // Status badge component
   const StatusBadge = ({ status }) => {
@@ -281,8 +232,10 @@ const ReturnParcel = () => {
         </div>
       </div>
 
+     
+
       {/* Mobile Card View */}
-      {isGridView && (
+      {!loading && isGridView && (
         <div className="block md:hidden">
           <div className="mb-4">
             <h2 className="text-lg font-semibold text-gray-800">
@@ -296,6 +249,9 @@ const ReturnParcel = () => {
       )}
 
       {/* Tablet and Desktop Table View */}
+     
+        <div className={`${isGridView ? 'hidden md:block' : 'block'}`}>
+           {/* Tablet and Desktop Table View */}
       <div className={`${isGridView ? 'hidden md:block' : 'block'}`}>
         <div className="bg-white rounded-b-lg shadow-sm border border-gray-200 overflow-hidden">
           {/* Table Header */}
@@ -308,7 +264,7 @@ const ReturnParcel = () => {
             </h2>
           </div>
 
-          {/* Table Container */}
+          {loading ? <Spinner></Spinner>:(<>{/* Table Container */}
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1000px] lg:min-w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
@@ -431,9 +387,11 @@ const ReturnParcel = () => {
                 </select>
               </div>
             </div>
-          </div>
+          </div></>)}
         </div>
       </div>
+        </div>
+     
     </div>
   );
 };
