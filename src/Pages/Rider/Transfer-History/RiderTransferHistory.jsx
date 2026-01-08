@@ -1,4 +1,5 @@
-import React from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import {
   FiRefreshCcw,
   FiList,
@@ -10,111 +11,42 @@ import {
   FiCalendar,
   FiEye,
 } from 'react-icons/fi';
+import Spinner from '../../../Shared/Spinier/Spinier';
 
 const RiderTransferHistory = () => {
-  // Fake data matching the image
-  const tableData = [
-    {
-      id: 1,
-      date: '16-07-2024',
-      invoiceId: 'T8D57720',
-      pickupAddress: 'nikunja 1 road 3/c',
-      deliveryAddress: 'Head Office',
-      status: 'complete',
-      type: 'delivery',
-      amount: '0.0000',
-    },
-    {
-      id: 2,
-      date: '16-07-2024',
-      invoiceId: 'T8DH72471',
-      pickupAddress: 'Head Office',
-      deliveryAddress: 'nikunja 1 road 3/c',
-      status: 'complete',
-      type: 'delivery',
-      amount: '0.0000',
-    },
-    {
-      id: 3,
-      date: '17-07-2024',
-      invoiceId: 'T8DH65032',
-      pickupAddress: 'Head Office',
-      deliveryAddress: 'Sub Dhaka',
-      status: 'complete',
-      type: 'delivery',
-      amount: '0.0000',
-    },
-    {
-      id: 4,
-      date: '26-07-2024',
-      invoiceId: 'T8DH52253',
-      pickupAddress: 'Head Office',
-      deliveryAddress: 'out of dhaka',
-      status: 'complete',
-      type: 'delivery',
-      amount: '0.0000',
-    },
-    {
-      id: 5,
-      date: '16-07-2024',
-      invoiceId: 'T8R88934',
-      pickupAddress: 'nikunja 1 road 3/c',
-      deliveryAddress: 'Head Office',
-      status: 'complete',
-      type: 'return',
-      amount: '0.0000',
-    },
-    {
-      id: 6,
-      date: '16-07-2024',
-      invoiceId: 'T8RH99855',
-      pickupAddress: 'Head Office',
-      deliveryAddress: 'nikunja 1 road 3/c',
-      status: 'complete',
-      type: 'return',
-      amount: '0.0000',
-    },
-    {
-      id: 7,
-      date: '26-09-2024',
-      invoiceId: 'T8D34337',
-      pickupAddress: 'nikunja 1 road 3/c',
-      deliveryAddress: 'Head Office',
-      status: 'complete',
-      type: 'delivery',
-      amount: '0.0000',
-    },
-    {
-      id: 8,
-      date: '26-09-2024',
-      invoiceId: 'T8DH36118',
-      pickupAddress: 'Head Office',
-      deliveryAddress: 'nikunja 1 road 3/c',
-      status: 'complete',
-      type: 'delivery',
-      amount: '0.0000',
-    },
-    {
-      id: 9,
-      date: '26-09-2024',
-      invoiceId: 'T8R83239',
-      pickupAddress: 'nikunja 1 road 3/c',
-      deliveryAddress: 'Head Office',
-      status: 'complete',
-      type: 'return',
-      amount: '0.0000',
-    },
-    {
-      id: 10,
-      date: '26-09-2024',
-      invoiceId: 'T8RH903110',
-      pickupAddress: 'Head Office',
-      deliveryAddress: 'nikunja 1 road 3/c',
-      status: 'complete',
-      type: 'return',
-      amount: '0.0000',
-    },
-  ];
+    const [tableData, setTableData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch API data
+  useEffect(() => {
+    fetchTransferHistory();
+  }, []);
+
+  const fetchTransferHistory = async () => {
+    try {
+      setLoading(true);
+
+      // 🔐 Get token
+    const token = localStorage.getItem('token'); // token from localStorage
+
+      const res = await axios.get(
+        'https://courierly.demo-bd.com/api/transfer-history',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+        }
+      );
+
+      setTableData(res.data || []);
+    } catch (error) {
+      console.error('Transfer history fetch failed:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   // Status badge component
   const StatusBadge = ({ status }) => {
@@ -243,7 +175,7 @@ const RiderTransferHistory = () => {
         </div>
       </div>
 
-      {/* Table Section */}
+     {loading ? <Spinner></Spinner> : (<> {/* Table Section */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {/* Table Container */}
         <div className="overflow-x-auto">
@@ -284,20 +216,20 @@ const RiderTransferHistory = () => {
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
                     {index + 1}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                    {item.date}
+                    <td className="px-4 py-3 border-r border-gray-200">
+                    {new Date(item.created_at).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-600 border-r border-gray-200">
-                    {item.invoiceId}
+                   <td className="px-4 py-3 text-blue-600 font-medium border-r border-gray-200">
+                    {item.invoice_id}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200 max-w-xs">
-                    <div className="truncate" title={item.pickupAddress}>
-                      {item.pickupAddress}
+                    <div className="truncate" title= {item.sender?.address}>
+                       {item.sender?.address}
                     </div>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200 max-w-xs">
-                    <div className="truncate" title={item.deliveryAddress}>
-                      {item.deliveryAddress}
+                    <div className="truncate" title= {item.receiver?.address}>
+                       {item.receiver?.address}
                     </div>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap border-r border-gray-200">
@@ -334,7 +266,7 @@ const RiderTransferHistory = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div></>)}
     </div>
   );
 };

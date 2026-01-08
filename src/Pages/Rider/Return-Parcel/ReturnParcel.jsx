@@ -25,6 +25,9 @@ const ReturnParcel = () => {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(false); // ✅ loading state
   const token = localStorage.getItem('token');
+  const [currentPage, setCurrentPage] = useState(1);
+const [itemsPerPage, setItemsPerPage] = useState(8);
+
 
   useEffect(() => {
     fetchData();
@@ -62,6 +65,51 @@ const ReturnParcel = () => {
       setLoading(false); // ✅ stop loading
     }
   };
+
+  // 🔥 Pagination Logic
+const totalItems = tableData.length;
+
+const totalPages =
+  itemsPerPage === 'all'
+    ? 1
+    : Math.ceil(totalItems / itemsPerPage);
+
+const startIndex =
+  itemsPerPage === 'all'
+    ? 0
+    : (currentPage - 1) * itemsPerPage;
+
+const currentData =
+  itemsPerPage === 'all'
+    ? tableData
+    : tableData.slice(startIndex, startIndex + itemsPerPage);
+
+const handlePerPageChange = e => {
+  const value =
+    e.target.value === 'all' ? 'all' : Number(e.target.value);
+  setItemsPerPage(value);
+  setCurrentPage(1);
+};
+
+const getPaginationNumbers = () => {
+  const pages = [];
+  if (totalPages <= 5) {
+    for (let i = 1; i <= totalPages; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (currentPage > 3) pages.push('...');
+    for (
+      let i = Math.max(2, currentPage - 1);
+      i <= Math.min(totalPages - 1, currentPage + 1);
+      i++
+    ) {
+      pages.push(i);
+    }
+    if (currentPage < totalPages - 2) pages.push('...');
+    pages.push(totalPages);
+  }
+  return pages;
+};
 
   // Status badge component
   const StatusBadge = ({ status }) => {
@@ -242,7 +290,7 @@ const ReturnParcel = () => {
               Return Parcels ({tableData.length})
             </h2>
           </div>
-          {tableData.map((item, index) => (
+          {currentData.map((item, index) => (
             <MobileCard key={item.id} item={item} index={index} />
           ))}
         </div>
@@ -304,7 +352,7 @@ const ReturnParcel = () => {
 
               {/* Table Body */}
               <tbody className="bg-white divide-y divide-gray-200">
-                {tableData.map((item, index) => (
+                {currentData.map((item, index) => (
                   <tr
                     key={item.id}
                     className="hover:bg-gray-50 transition-colors duration-200"
@@ -374,20 +422,73 @@ const ReturnParcel = () => {
 
           {/* Table Footer */}
           <div className="px-4 md:px-6 py-4 border-t border-gray-200 bg-gray-50">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-600">
-              <div>
-                Showing {tableData.length} of {tableData.length} entries
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="hidden sm:inline">Rows per page:</span>
-                <select className="bg-white border border-gray-300 rounded px-2 py-1 text-sm">
-                  <option>10</option>
-                  <option>25</option>
-                  <option>50</option>
-                </select>
-              </div>
-            </div>
-          </div></>)}
+  <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
+
+    {/* Showing info */}
+    <div>
+      Showing {currentData.length} of {totalItems} entries
+    </div>
+
+    {/* Per Page */}
+    <div className="flex items-center gap-2">
+      <span className="hidden sm:inline">Rows per page:</span>
+      <select
+        value={itemsPerPage}
+        onChange={handlePerPageChange}
+        className="bg-white border border-gray-300 rounded px-2 py-1 text-sm"
+      >
+        <option value={8}>8</option>
+        <option value={10}>10</option>
+        <option value={20}>20</option>
+        <option value="all">All</option>
+      </select>
+    </div>
+
+    {/* Pagination */}
+    <div className="flex items-center gap-2">
+     <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => p - 1)}
+                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Previous
+                  </button>
+
+      {getPaginationNumbers().map((page, idx) =>
+        page === '...' ? (
+          <span key={idx} className="px-2">…</span>
+        ) : (
+          <button
+            key={idx}
+            onClick={() => setCurrentPage(page)}
+            className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
+              currentPage === page
+                ? 'bg-blue-600 text-white'
+                : 'border-gray-300'
+            }`}
+          >
+            {page}
+          </button>
+        )
+      )}
+
+     <button
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(p => p + 1)}
+                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+                  >
+                    Next
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+    </div>
+  </div>
+</div>
+</>)}
         </div>
       </div>
         </div>

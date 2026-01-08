@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import {
   FiRefreshCcw,
   FiList,
@@ -14,123 +15,40 @@ import {
   FiXCircle,
   FiClock,
 } from 'react-icons/fi';
+import Spinner from '../../../Shared/Spinier/Spinier';
 
 const RiderReturnHistory = () => {
+   const [tableData, setTableData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [isGridView, setIsGridView] = useState(false);
 
-  // Fake data for the table
-  const tableData = [
-    {
-      id: 1,
-      createDate: '2024-01-15',
-      invoiceNo: 'RTN-001',
-      merchantName: 'ABC Store',
-      riderName: 'John Rider',
-      createBy: 'System Auto',
-      updateBy: 'Admin User',
-      securityCode: 'SEC-001',
-      status: 'Pending',
-    },
-    {
-      id: 2,
-      createDate: '2024-01-15',
-      invoiceNo: 'RTN-002',
-      merchantName: 'XYZ Shop',
-      riderName: 'Sarah Ahmed',
-      createBy: 'Admin User',
-      updateBy: 'Manager',
-      securityCode: 'SEC-002',
-      status: 'In Progress',
-    },
-    {
-      id: 3,
-      createDate: '2024-01-14',
-      invoiceNo: 'RTN-003',
-      merchantName: 'Super Mart',
-      riderName: 'David Khan',
-      createBy: 'System Auto',
-      updateBy: 'System Auto',
-      securityCode: 'SEC-003',
-      status: 'Completed',
-    },
-    {
-      id: 4,
-      createDate: '2024-01-14',
-      invoiceNo: 'RTN-004',
-      merchantName: 'Best Buy',
-      riderName: 'Lisa Rahman',
-      createBy: 'Manager',
-      updateBy: 'Admin User',
-      securityCode: 'SEC-004',
-      status: 'Cancelled',
-    },
-    {
-      id: 5,
-      createDate: '2024-01-13',
-      invoiceNo: 'RTN-005',
-      merchantName: 'Tech World',
-      riderName: 'Mike Hossain',
-      createBy: 'System Auto',
-      updateBy: 'Manager',
-      securityCode: 'SEC-005',
-      status: 'Pending',
-    },
-    {
-      id: 6,
-      createDate: '2024-01-13',
-      invoiceNo: 'RTN-006',
-      merchantName: 'Fashion Hub',
-      riderName: 'Anna Islam',
-      createBy: 'Admin User',
-      updateBy: 'System Auto',
-      securityCode: 'SEC-006',
-      status: 'In Progress',
-    },
-    {
-      id: 7,
-      createDate: '2024-01-12',
-      invoiceNo: 'RTN-007',
-      merchantName: 'Home Decor',
-      riderName: 'Robert Ali',
-      createBy: 'System Auto',
-      updateBy: 'Admin User',
-      securityCode: 'SEC-007',
-      status: 'Completed',
-    },
-    {
-      id: 8,
-      createDate: '2024-01-12',
-      invoiceNo: 'RTN-008',
-      merchantName: 'Gadget Store',
-      riderName: 'Maria Khan',
-      createBy: 'Manager',
-      updateBy: 'Manager',
-      securityCode: 'SEC-008',
-      status: 'Pending',
-    },
-    {
-      id: 9,
-      createDate: '2024-01-11',
-      invoiceNo: 'RTN-009',
-      merchantName: 'Sports World',
-      riderName: 'Alex Hossain',
-      createBy: 'System Auto',
-      updateBy: 'Admin User',
-      securityCode: 'SEC-009',
-      status: 'Completed',
-    },
-    {
-      id: 10,
-      createDate: '2024-01-11',
-      invoiceNo: 'RTN-010',
-      merchantName: 'Book Store',
-      riderName: 'Sara Jahan',
-      createBy: 'Admin User',
-      updateBy: 'System Auto',
-      securityCode: 'SEC-010',
-      status: 'In Progress',
-    },
-  ];
+  // data load
+ useEffect(() => {
+    fetchReturnHistory();
+  }, []);
+
+  const fetchReturnHistory = async () => {
+    try {
+      setLoading(true);
+        const token = localStorage.getItem('token'); // token from localStorage
+
+      const res = await axios.get(
+        'https://courierly.demo-bd.com/api/return-history',
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
+          },
+        }
+      );
+
+      setTableData(res.data?.payments_date || []);
+    } catch (error) {
+      console.error('Return history fetch failed', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Status badge component
   const StatusBadge = ({ status }) => {
@@ -248,7 +166,7 @@ const RiderReturnHistory = () => {
         </div>
       </div>
 
-      {/* Table Section */}
+     {loading ? <Spinner></Spinner> : (<> {/* Table Section */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         {/* Table Container */}
         <div className="overflow-x-auto">
@@ -299,25 +217,25 @@ const RiderReturnHistory = () => {
                     {index + 1}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                    {item.createDate}
+            {new Date(item.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-600 border-r border-gray-200">
-                    {item.invoiceNo}
+                        {item.invoice_id}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                    {item.merchantName}
+                {item.merchant?.name}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                    {item.riderName}
+                        {item.rider?.name}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                    {item.createBy}
+                  {item.creator?.name}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                    {item.updateBy}
+                      {item.updator?.name || '-'}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm font-mono text-gray-600 border-r border-gray-200">
-                    {item.securityCode}
+                     {item.security_code}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap border-r border-gray-200">
                     <StatusBadge status={item.status} />
@@ -358,7 +276,7 @@ const RiderReturnHistory = () => {
             </div>
           </div>
         </div>
-      </div>
+      </div></>)}
     </div>
   );
 };

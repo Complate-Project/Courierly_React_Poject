@@ -66,10 +66,7 @@ const TransferOrder = () => {
   const currentData = tableData.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(tableData.length / itemsPerPage);
 
-  const handlePageChange = (pageNumber) => {
-    if (pageNumber < 1 || pageNumber > totalPages) return;
-    setCurrentPage(pageNumber);
-  };
+
 
   // Type badge component
   const TypeBadge = ({ type }) => {
