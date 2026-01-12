@@ -18,19 +18,21 @@ import {
 import Spinner from '../../../Shared/Spinier/Spinier';
 
 const RiderReturnHistory = () => {
-   const [tableData, setTableData] = useState([]);
+  const [tableData, setTableData] = useState([]);
+  console.log(tableData);
+
   const [loading, setLoading] = useState(false);
   const [isGridView, setIsGridView] = useState(false);
 
   // data load
- useEffect(() => {
+  useEffect(() => {
     fetchReturnHistory();
   }, []);
 
   const fetchReturnHistory = async () => {
     try {
       setLoading(true);
-        const token = localStorage.getItem('token'); // token from localStorage
+      const token = localStorage.getItem('token'); // token from localStorage
 
       const res = await axios.get(
         'https://courierly.demo-bd.com/api/return-history',
@@ -166,117 +168,124 @@ const RiderReturnHistory = () => {
         </div>
       </div>
 
-     {loading ? <Spinner></Spinner> : (<> {/* Table Section */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        {/* Table Container */}
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1000px]">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  SL.
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  Create Date
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  Invoice No
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  Merchant Name
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  Rider Name
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  Create By
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  Update By
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  Security Code
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  Status
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Action
-                </th>
-              </tr>
-            </thead>
+      {loading ? (
+        <Spinner></Spinner>
+      ) : (
+        <>
+          {' '}
+          {/* Table Section */}
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            {/* Table Container */}
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[1000px]">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      SL.
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      Create Date
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      Invoice No
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      Merchant Name
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      Rider Name
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      Create By
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      Update By
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      Security Code
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      Status
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
 
-            {/* Table Body with Data */}
-            <tbody className="bg-white divide-y divide-gray-200">
-              {tableData.map((item, index) => (
-                <tr
-                  key={item.id}
-                  className="hover:bg-gray-50 transition-colors duration-200"
-                >
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                    {index + 1}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-            {new Date(item.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-600 border-r border-gray-200">
+                {/* Table Body with Data */}
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {tableData.map((item, index) => (
+                    <tr
+                      key={item.id}
+                      className="hover:bg-gray-50 transition-colors duration-200"
+                    >
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
+                        {index + 1}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
+                        {new Date(item.created_at).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-600 border-r border-gray-200">
                         {item.invoice_id}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                {item.merchant?.name}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
+                        {item.merchant?.name}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
                         {item.rider?.name}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                  {item.creator?.name}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                      {item.updator?.name || '-'}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm font-mono text-gray-600 border-r border-gray-200">
-                     {item.security_code}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap border-r border-gray-200">
-                    <StatusBadge status={item.status} />
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    <div className="flex items-center gap-1">
-                      <button className="bg-blue-600 text-white px-2 py-1.5 rounded text-xs hover:bg-blue-700 transition-colors duration-200 flex items-center gap-1">
-                        <FiEye size={10} />
-                        View
-                      </button>
-                      <button className="bg-green-600 text-white px-2 py-1.5 rounded text-xs hover:bg-green-700 transition-colors duration-200 flex items-center gap-1">
-                        <FiEdit size={10} />
-                        Edit
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Table Footer */}
-        <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-600">
-            <div>
-              Showing 1 to {tableData.length} of {tableData.length} rows
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
+                        {item.creator?.name}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
+                        {item.updator?.name || '-'}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-mono text-gray-600 border-r border-gray-200">
+                        {item.security_code}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap border-r border-gray-200">
+                        <StatusBadge status={item.status} />
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center gap-1">
+                          <button className="bg-blue-600 text-white px-2 py-1.5 rounded text-xs hover:bg-blue-700 transition-colors duration-200 flex items-center gap-1">
+                            <FiEye size={10} />
+                            View
+                          </button>
+                          <button className="bg-green-600 text-white px-2 py-1.5 rounded text-xs hover:bg-green-700 transition-colors duration-200 flex items-center gap-1">
+                            <FiEdit size={10} />
+                            Edit
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <div className="flex items-center gap-2">
-              <span>10</span>
-              <select className="bg-white border border-gray-300 rounded px-2 py-1 text-sm">
-                <option>10</option>
-                <option>25</option>
-                <option>50</option>
-                <option>100</option>
-              </select>
-              <span>rows per page</span>
+
+            {/* Table Footer */}
+            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-600">
+                <div>
+                  Showing 1 to {tableData.length} of {tableData.length} rows
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>10</span>
+                  <select className="bg-white border border-gray-300 rounded px-2 py-1 text-sm">
+                    <option>10</option>
+                    <option>25</option>
+                    <option>50</option>
+                    <option>100</option>
+                  </select>
+                  <span>rows per page</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div></>)}
+        </>
+      )}
     </div>
   );
 };

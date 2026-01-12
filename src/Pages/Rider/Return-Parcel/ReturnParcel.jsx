@@ -26,8 +26,7 @@ const ReturnParcel = () => {
   const [loading, setLoading] = useState(false); // ✅ loading state
   const token = localStorage.getItem('token');
   const [currentPage, setCurrentPage] = useState(1);
-const [itemsPerPage, setItemsPerPage] = useState(8);
-
+  const [itemsPerPage, setItemsPerPage] = useState(8);
 
   useEffect(() => {
     fetchData();
@@ -67,49 +66,44 @@ const [itemsPerPage, setItemsPerPage] = useState(8);
   };
 
   // 🔥 Pagination Logic
-const totalItems = tableData.length;
+  const totalItems = tableData.length;
 
-const totalPages =
-  itemsPerPage === 'all'
-    ? 1
-    : Math.ceil(totalItems / itemsPerPage);
+  const totalPages =
+    itemsPerPage === 'all' ? 1 : Math.ceil(totalItems / itemsPerPage);
 
-const startIndex =
-  itemsPerPage === 'all'
-    ? 0
-    : (currentPage - 1) * itemsPerPage;
+  const startIndex =
+    itemsPerPage === 'all' ? 0 : (currentPage - 1) * itemsPerPage;
 
-const currentData =
-  itemsPerPage === 'all'
-    ? tableData
-    : tableData.slice(startIndex, startIndex + itemsPerPage);
+  const currentData =
+    itemsPerPage === 'all'
+      ? tableData
+      : tableData.slice(startIndex, startIndex + itemsPerPage);
 
-const handlePerPageChange = e => {
-  const value =
-    e.target.value === 'all' ? 'all' : Number(e.target.value);
-  setItemsPerPage(value);
-  setCurrentPage(1);
-};
+  const handlePerPageChange = e => {
+    const value = e.target.value === 'all' ? 'all' : Number(e.target.value);
+    setItemsPerPage(value);
+    setCurrentPage(1);
+  };
 
-const getPaginationNumbers = () => {
-  const pages = [];
-  if (totalPages <= 5) {
-    for (let i = 1; i <= totalPages; i++) pages.push(i);
-  } else {
-    pages.push(1);
-    if (currentPage > 3) pages.push('...');
-    for (
-      let i = Math.max(2, currentPage - 1);
-      i <= Math.min(totalPages - 1, currentPage + 1);
-      i++
-    ) {
-      pages.push(i);
+  const getPaginationNumbers = () => {
+    const pages = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push('...');
+      for (
+        let i = Math.max(2, currentPage - 1);
+        i <= Math.min(totalPages - 1, currentPage + 1);
+        i++
+      ) {
+        pages.push(i);
+      }
+      if (currentPage < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
     }
-    if (currentPage < totalPages - 2) pages.push('...');
-    pages.push(totalPages);
-  }
-  return pages;
-};
+    return pages;
+  };
 
   // Status badge component
   const StatusBadge = ({ status }) => {
@@ -280,8 +274,6 @@ const getPaginationNumbers = () => {
         </div>
       </div>
 
-     
-
       {/* Mobile Card View */}
       {!loading && isGridView && (
         <div className="block md:hidden">
@@ -297,202 +289,232 @@ const getPaginationNumbers = () => {
       )}
 
       {/* Tablet and Desktop Table View */}
-     
-        <div className={`${isGridView ? 'hidden md:block' : 'block'}`}>
-           {/* Tablet and Desktop Table View */}
+
       <div className={`${isGridView ? 'hidden md:block' : 'block'}`}>
-        <div className="bg-white rounded-b-lg shadow-sm border border-gray-200 overflow-hidden">
-          {/* Table Header */}
-          <div className="px-4 md:px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              Return Parcel List
-              <span className="text-sm font-normal text-gray-500">
-                ({tableData.length} parcels)
-              </span>
-            </h2>
+        {/* Tablet and Desktop Table View */}
+        <div className={`${isGridView ? 'hidden md:block' : 'block'}`}>
+          <div className="bg-white rounded-b-lg shadow-sm border border-gray-200 overflow-hidden">
+            {/* Table Header */}
+            <div className="px-4 md:px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                Return Parcel List
+                <span className="text-sm font-normal text-gray-500">
+                  ({tableData.length} parcels)
+                </span>
+              </h2>
+            </div>
+
+            {loading ? (
+              <Spinner></Spinner>
+            ) : (
+              <>
+                {/* Table Container */}
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[1000px] lg:min-w-full">
+                    <thead className="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          SL.
+                        </th>
+                        <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Create Date
+                        </th>
+                        <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Invoice No
+                        </th>
+                        <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Merchant Name
+                        </th>
+                        <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Merchant Phone
+                        </th>
+                        <th className="hidden lg:table-cell px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Merchant Address
+                        </th>
+                        <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Rider Name
+                        </th>
+                        <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Create By
+                        </th>
+                        <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          Action
+                        </th>
+                      </tr>
+                    </thead>
+
+                    {/* Table Body */}
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {currentData.map((item, index) => (
+                        <tr
+                          key={item.id}
+                          className="hover:bg-gray-50 transition-colors duration-200"
+                        >
+                          <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {index + 1}
+                          </td>
+                          <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {item.createDate}
+                          </td>
+                          <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
+                            {item.invoiceNo}
+                          </td>
+                          <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {item.merchantName}
+                          </td>
+                          <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div className="flex items-center gap-1">
+                              <FiPhone size={14} className="text-gray-400" />
+                              {item.merchantPhone}
+                            </div>
+                          </td>
+                          <td className="hidden lg:table-cell px-4 md:px-6 py-4 text-sm text-gray-900 max-w-xs">
+                            <div className="flex items-start gap-2">
+                              <FiMapPin
+                                size={14}
+                                className="text-gray-400 mt-0.5 flex-shrink-0"
+                              />
+                              <span
+                                className="truncate"
+                                title={item.merchantAddress}
+                              >
+                                {item.merchantAddress}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div className="flex items-center gap-1">
+                              <FiUser size={14} className="text-gray-400" />
+                              {item.riderName}
+                            </div>
+                          </td>
+                          <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {item.createBy}
+                          </td>
+                          <td className="px-4 md:px-6 py-4 whitespace-nowrap">
+                            <StatusBadge status={item.status} />
+                          </td>
+                          <td className="px-4 md:px-6 py-4 whitespace-nowrap">
+                            <div className="flex flex-wrap gap-1">
+                              <button className="bg-blue-600 text-white px-3 py-1.5 rounded text-xs hover:bg-blue-700 transition-colors duration-200 flex items-center gap-1">
+                                <FiEye size={12} />
+                                <span className="hidden sm:inline">View</span>
+                              </button>
+                              <button className="bg-green-600 text-white px-3 py-1.5 rounded text-xs hover:bg-green-700 transition-colors duration-200 flex items-center gap-1">
+                                <FiEdit size={12} />
+                                <span className="hidden sm:inline">
+                                  Process
+                                </span>
+                              </button>
+                              <button className="bg-purple-600 text-white px-3 py-1.5 rounded text-xs hover:bg-purple-700 transition-colors duration-200 flex items-center gap-1">
+                                <FiTruck size={12} />
+                                <span className="hidden sm:inline">Track</span>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Table Footer */}
+                <div className="px-4 md:px-6 py-4 border-t border-gray-200 bg-gray-50">
+                  <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
+                    {/* Showing info */}
+                    <div>
+                      Showing {currentData.length} of {totalItems} entries
+                    </div>
+
+                    {/* Per Page */}
+                    <div className="flex items-center gap-2">
+                      <span className="hidden sm:inline">Rows per page:</span>
+                      <select
+                        value={itemsPerPage}
+                        onChange={handlePerPageChange}
+                        className="bg-white border border-gray-300 rounded px-2 py-1 text-sm"
+                      >
+                        <option value={8}>8</option>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value="all">All</option>
+                      </select>
+                    </div>
+
+                    {/* Pagination */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage(p => p - 1)}
+                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 19l-7-7 7-7"
+                          />
+                        </svg>
+                        Previous
+                      </button>
+
+                      {getPaginationNumbers().map((page, idx) =>
+                        page === '...' ? (
+                          <span key={idx} className="px-2">
+                            …
+                          </span>
+                        ) : (
+                          <button
+                            key={idx}
+                            onClick={() => setCurrentPage(page)}
+                            className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
+                              currentPage === page
+                                ? 'bg-blue-600 text-white'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        )
+                      )}
+
+                      <button
+                        disabled={currentPage === totalPages}
+                        onClick={() => setCurrentPage(p => p + 1)}
+                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+                      >
+                        Next
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
-
-          {loading ? <Spinner></Spinner>:(<>{/* Table Container */}
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[1000px] lg:min-w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    SL.
-                  </th>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Create Date
-                  </th>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Invoice No
-                  </th>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Merchant Name
-                  </th>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Merchant Phone
-                  </th>
-                  <th className="hidden lg:table-cell px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Merchant Address
-                  </th>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Rider Name
-                  </th>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Create By
-                  </th>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-4 md:px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-
-              {/* Table Body */}
-              <tbody className="bg-white divide-y divide-gray-200">
-                {currentData.map((item, index) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-gray-50 transition-colors duration-200"
-                  >
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {index + 1}
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {item.createDate}
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">
-                      {item.invoiceNo}
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {item.merchantName}
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div className="flex items-center gap-1">
-                        <FiPhone size={14} className="text-gray-400" />
-                        {item.merchantPhone}
-                      </div>
-                    </td>
-                    <td className="hidden lg:table-cell px-4 md:px-6 py-4 text-sm text-gray-900 max-w-xs">
-                      <div className="flex items-start gap-2">
-                        <FiMapPin
-                          size={14}
-                          className="text-gray-400 mt-0.5 flex-shrink-0"
-                        />
-                        <span className="truncate" title={item.merchantAddress}>
-                          {item.merchantAddress}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <div className="flex items-center gap-1">
-                        <FiUser size={14} className="text-gray-400" />
-                        {item.riderName}
-                      </div>
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {item.createBy}
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap">
-                      <StatusBadge status={item.status} />
-                    </td>
-                    <td className="px-4 md:px-6 py-4 whitespace-nowrap">
-                      <div className="flex flex-wrap gap-1">
-                        <button className="bg-blue-600 text-white px-3 py-1.5 rounded text-xs hover:bg-blue-700 transition-colors duration-200 flex items-center gap-1">
-                          <FiEye size={12} />
-                          <span className="hidden sm:inline">View</span>
-                        </button>
-                        <button className="bg-green-600 text-white px-3 py-1.5 rounded text-xs hover:bg-green-700 transition-colors duration-200 flex items-center gap-1">
-                          <FiEdit size={12} />
-                          <span className="hidden sm:inline">Process</span>
-                        </button>
-                        <button className="bg-purple-600 text-white px-3 py-1.5 rounded text-xs hover:bg-purple-700 transition-colors duration-200 flex items-center gap-1">
-                          <FiTruck size={12} />
-                          <span className="hidden sm:inline">Track</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Table Footer */}
-          <div className="px-4 md:px-6 py-4 border-t border-gray-200 bg-gray-50">
-  <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
-
-    {/* Showing info */}
-    <div>
-      Showing {currentData.length} of {totalItems} entries
-    </div>
-
-    {/* Per Page */}
-    <div className="flex items-center gap-2">
-      <span className="hidden sm:inline">Rows per page:</span>
-      <select
-        value={itemsPerPage}
-        onChange={handlePerPageChange}
-        className="bg-white border border-gray-300 rounded px-2 py-1 text-sm"
-      >
-        <option value={8}>8</option>
-        <option value={10}>10</option>
-        <option value={20}>20</option>
-        <option value="all">All</option>
-      </select>
-    </div>
-
-    {/* Pagination */}
-    <div className="flex items-center gap-2">
-     <button
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(p => p - 1)}
-                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Previous
-                  </button>
-
-      {getPaginationNumbers().map((page, idx) =>
-        page === '...' ? (
-          <span key={idx} className="px-2">…</span>
-        ) : (
-          <button
-            key={idx}
-            onClick={() => setCurrentPage(page)}
-            className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
-              currentPage === page
-                ? 'bg-blue-600 text-white'
-                : 'border-gray-300'
-            }`}
-          >
-            {page}
-          </button>
-        )
-      )}
-
-     <button
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(p => p + 1)}
-                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
-                  >
-                    Next
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-    </div>
-  </div>
-</div>
-</>)}
         </div>
       </div>
-        </div>
-     
     </div>
   );
 };

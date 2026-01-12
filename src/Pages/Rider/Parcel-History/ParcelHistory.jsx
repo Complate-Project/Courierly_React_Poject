@@ -13,12 +13,15 @@ import {
 import Spinner from '../../../Shared/Spinier/Spinier';
 
 const ParcelHistory = () => {
-   const [tableData, setTableData] = useState([]);
+  const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fake data matching the image
-const token = localStorage.getItem('token'); // get token from localStorage
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Default 10
+  const token = localStorage.getItem('token');
 
+  // Fetch API data
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -32,13 +35,12 @@ const token = localStorage.getItem('token'); // get token from localStorage
           }
         );
 
-        // Map API response to tableData structure
-        const mappedData = res.data.map((item) => ({
+        const mappedData = res.data.map(item => ({
           id: item.id,
           trackingId: item.tracking_id,
           pickupDate: item.pickup_date
             ? item.pickup_date
-            : item.created_at.split('T')[0], // fallback to created_at
+            : item.created_at.split('T')[0],
           merchantName: item.business_name || 'N/A',
           customerName: item.customer_name,
           customerPhone: item.customer_phone,
@@ -59,9 +61,38 @@ const token = localStorage.getItem('token'); // get token from localStorage
     fetchData();
   }, [token]);
 
+  // Calculate pagination
+  const totalPages =
+    itemsPerPage === 'all' ? 1 : Math.ceil(tableData.length / itemsPerPage);
+  const startIndex =
+    itemsPerPage === 'all' ? 0 : (currentPage - 1) * itemsPerPage;
+  const endIndex =
+    itemsPerPage === 'all'
+      ? tableData.length
+      : startIndex + Number(itemsPerPage);
+  const currentData =
+    itemsPerPage === 'all' ? tableData : tableData.slice(startIndex, endIndex);
+
+  // Dynamic page numbers for display
+  const getPageNumbers = () => {
+    if (itemsPerPage === 'all') return [];
+    const pages = [];
+    const maxPageNumbers = 5;
+    let start = Math.max(1, currentPage - 2);
+    let end = Math.min(totalPages, currentPage + 2);
+
+    if (end - start < maxPageNumbers - 1) {
+      start = Math.max(1, end - (maxPageNumbers - 1));
+      end = Math.min(totalPages, start + (maxPageNumbers - 1));
+    }
+
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  };
+
   return (
-    <div className="">
-      {/* Header Section */}
+    <div>
+      {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
           Rider Order History
@@ -71,7 +102,6 @@ const token = localStorage.getItem('token'); // get token from localStorage
       {/* Control Panel */}
       <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-          {/* Left Controls */}
           <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             {/* Status Filter */}
             <div className="relative w-full sm:w-48">
@@ -128,7 +158,6 @@ const token = localStorage.getItem('token'); // get token from localStorage
 
           {/* Right Controls */}
           <div className="flex items-center gap-2 w-full lg:w-auto">
-            {/* Search */}
             <div className="relative flex-1 lg:flex-none">
               <FiSearch
                 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -141,7 +170,6 @@ const token = localStorage.getItem('token'); // get token from localStorage
               />
             </div>
 
-            {/* Action Buttons */}
             <div className="flex items-center gap-1">
               <button className="p-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors duration-200">
                 <FiRefreshCcw size={16} className="text-gray-600" />
@@ -162,96 +190,207 @@ const token = localStorage.getItem('token'); // get token from localStorage
 
       {/* Table Section */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-      {loading?<Spinner></Spinner>:(<>  {/* Table Container */}
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  SL
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  Tracking ID
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  Pickup Date
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  Merchant Name
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  Customer Name
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  Customer Phone
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  Customer Address
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
-                  Invoice Value
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Type
-                </th>
-              </tr>
-            </thead>
+        {loading ? (
+          <Spinner />
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      SL
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      Tracking ID
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      Pickup Date
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      Merchant Name
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      Customer Name
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      Customer Phone
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      Customer Address
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-r border-gray-200">
+                      Invoice Value
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Type
+                    </th>
+                  </tr>
+                </thead>
 
-            {/* Table Body */}
-            <tbody className="bg-white divide-y divide-gray-200">
-              {tableData.map((item, index) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                    {index + 1}.
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-600 border-r border-gray-200">
-                    {item.trackingId}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                    {item.pickupDate}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                    {item.merchantName}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                    {item.customerName}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                    {item.customerPhone}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200 max-w-xs">
-                    <div className="truncate" title={item.customerAddress}>
-                      {item.customerAddress}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
-                    {item.invoiceValue}
-                  </td>
-                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                    {item.type}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Table Footer */}
-        <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-600">
-            <div>Showing 1 to 10 of 222 rows</div>
-            <div className="flex items-center gap-2">
-              <span>10</span>
-              <select className="bg-white border border-gray-300 rounded px-2 py-1 text-sm">
-                <option>10</option>
-                <option>25</option>
-                <option>50</option>
-                <option>100</option>
-              </select>
-              <span>rows per page</span>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {currentData.map((item, index) => (
+                    <tr key={item.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
+                        {index + 1}.
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-blue-600 border-r border-gray-200">
+                        {item.trackingId}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
+                        {item.pickupDate}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
+                        {item.merchantName}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
+                        {item.customerName}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
+                        {item.customerPhone}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-900 border-r border-gray-200 max-w-xs">
+                        <div className="truncate" title={item.customerAddress}>
+                          {item.customerAddress}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900 border-r border-gray-200">
+                        {item.invoiceValue}
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        {item.type}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          </div>
-        </div></>)}
+
+            {/* Pagination Footer */}
+            {/* Table Footer */}
+            <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-600">
+                <div>
+                  Showing {startIndex + 1} to{' '}
+                  {Math.min(endIndex, tableData.length)} of {tableData.length}{' '}
+                  rows
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>{itemsPerPage}</span>
+                  <select
+                    value={itemsPerPage}
+                    onChange={e => {
+                      const value =
+                        e.target.value === 'all'
+                          ? 'all'
+                          : Number(e.target.value);
+                      setItemsPerPage(value);
+                      setCurrentPage(1); // page reset
+                    }}
+                    className="bg-white border border-gray-300 rounded px-2 py-1 text-sm"
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                    <option value="all">All</option>
+                  </select>
+                  <div className="flex items-center gap-1">
+                    {/* Prev Button */}
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(p => p - 1)}
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                      Previous
+                    </button>
+
+                    {/* First Page */}
+                    {currentPage > 3 && (
+                      <>
+                        <button
+                          onClick={() => setCurrentPage(1)}
+                          className={`px-3 py-1 border rounded ${
+                            currentPage === 1 ? 'bg-blue-600 text-white' : ''
+                          }`}
+                        >
+                          1
+                        </button>
+                        {currentPage > 4 && <span>...</span>}
+                      </>
+                    )}
+
+                    {/* Middle Pages */}
+                    {getPageNumbers().map(page => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
+                          currentPage === page
+                            ? 'bg-blue-600 text-white'
+                            : 'border-gray-300'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+
+                    {/* Last Page */}
+                    {currentPage < totalPages - 2 && (
+                      <>
+                        {currentPage < totalPages - 3 && <span>...</span>}
+                        <button
+                          onClick={() => setCurrentPage(totalPages)}
+                          className={`px-3 py-1 border rounded ${
+                            currentPage === totalPages
+                              ? 'bg-blue-600 text-white'
+                              : ''
+                          }`}
+                        >
+                          {totalPages}
+                        </button>
+                      </>
+                    )}
+
+                    {/* Next Button */}
+                    <button
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(p => p + 1)}
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow"
+                    >
+                      Next
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
