@@ -31,7 +31,7 @@ const RiderDashboard = () => {
       const token = localStorage.getItem('token');
 
       const res = await axios.get(
-        'https://courierly.demo-bd.com/api/rider-dashboard',
+        `${import.meta.env.VITE_BASE_URL}/api/rider-dashboard`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

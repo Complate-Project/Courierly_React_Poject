@@ -30,13 +30,13 @@ const TransferOrder = () => {
   useEffect(() => {
     setLoading(true);
     axios
-      .get('https://courierly.demo-bd.com/api/transfer-parcel-list', {
+      .get(`${import.meta.env.VITE_BASE_URL}/api/transfer-parcel-list`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
-      .then((res) => {
-        const mappedData = res.data.map((item) => ({
+      .then(res => {
+        const mappedData = res.data.map(item => ({
           id: item.id,
           date: item.created_at ? item.created_at.split('T')[0] : '',
           invoiceId: item.invoice_id,
@@ -47,7 +47,7 @@ const TransferOrder = () => {
 
         setTableData(mappedData);
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Transfer Parcel API Error:', error);
       })
       .finally(() => {
@@ -65,8 +65,6 @@ const TransferOrder = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentData = tableData.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(tableData.length / itemsPerPage);
-
-
 
   // Type badge component
   const TypeBadge = ({ type }) => {
@@ -158,21 +156,19 @@ const TransferOrder = () => {
       <div className="bg-white rounded-t-lg shadow-sm border border-gray-200 p-4 md:p-6 ">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           {/* Left Controls */}
-           <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                     <div className="relative">
-                       <select className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
-                         <option>Export All</option>
-                         <option>Export Selected</option>
-                         <option>Export CSV</option>
-                       </select>
-                       <FiChevronDown
-                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                         size={16}
-                       />
-                     </div>
-         
-                  
-                   </div>
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            <div className="relative">
+              <select className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
+                <option>Export All</option>
+                <option>Export Selected</option>
+                <option>Export CSV</option>
+              </select>
+              <FiChevronDown
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                size={16}
+              />
+            </div>
+          </div>
 
           {/* Right Controls */}
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
@@ -192,7 +188,9 @@ const TransferOrder = () => {
               <button
                 onClick={() => setIsGridView(false)}
                 className={`p-2 rounded-md transition-all duration-300 ${
-                  !isGridView ? 'bg-white shadow-sm' : 'hover:bg-white hover:shadow-sm'
+                  !isGridView
+                    ? 'bg-white shadow-sm'
+                    : 'hover:bg-white hover:shadow-sm'
                 }`}
               >
                 <FiList
@@ -203,7 +201,9 @@ const TransferOrder = () => {
               <button
                 onClick={() => setIsGridView(true)}
                 className={`p-2 rounded-md transition-all duration-300 ${
-                  isGridView ? 'bg-white shadow-sm' : 'hover:bg-white hover:shadow-sm'
+                  isGridView
+                    ? 'bg-white shadow-sm'
+                    : 'hover:bg-white hover:shadow-sm'
                 }`}
               >
                 <FiGrid
@@ -304,7 +304,10 @@ const TransferOrder = () => {
                               size={14}
                               className="text-gray-400 mt-0.5 flex-shrink-0"
                             />
-                            <span className="truncate" title={item.pickupAddress}>
+                            <span
+                              className="truncate"
+                              title={item.pickupAddress}
+                            >
                               {item.pickupAddress}
                             </span>
                           </div>
@@ -315,7 +318,10 @@ const TransferOrder = () => {
                               size={14}
                               className="text-gray-400 mt-0.5 flex-shrink-0"
                             />
-                            <span className="truncate" title={item.deliveryAddress}>
+                            <span
+                              className="truncate"
+                              title={item.deliveryAddress}
+                            >
                               {item.deliveryAddress}
                             </span>
                           </div>
@@ -347,85 +353,115 @@ const TransferOrder = () => {
 
               {/* Pagination Controls */}
               <div className="flex justify-between items-center py-4 px-4 md:px-6 text-sm text-gray-600">
-                <div>Page {currentPage} of {totalPages}</div>
-              
-                <div className="flex gap-2">
-                  
-         <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-            <div className="relative w-32">
-              <select
-                value={itemsPerPage}
-                onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
-              >
-                <option value={8}>8 per page</option>
-                <option value={10}>10 per page</option>
-                <option value={20}>20 per page</option>
-                <option value={tableData.length}>All</option>
-              </select>
-              <FiChevronDown
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                size={16}
-              />
-            </div>
-          </div>
-                    <div className="flex items-center gap-2">
-                  {/* Previous */}
-                  <button
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(p => p - 1)}
-                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                    Previous
-                  </button>
-
-                  {/* First Page */}
-                  <button
-                    onClick={() => setCurrentPage(1)}
-                    className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${currentPage === 1 ? 'bg-blue-600 text-white' : 'border-gray-300'}`}
-                  >
-                    1
-                  </button>
-
-                  {/* Dots before current */}
-                  {currentPage > 2 && <span className="px-2">...</span>}
-
-                  {/* Current Page */}
-                  {currentPage !== 1 && currentPage !== totalPages && (
-                    <button className="w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 bg-blue-600 text-white">
-                      {currentPage}
-                    </button>
-                  )}
-
-                  {/* Dots after current */}
-                  {currentPage < totalPages - 1 && <span className="px-2">...</span>}
-
-                  {/* Last Page */}
-                  {totalPages > 1 && (
-                    <button
-                      onClick={() => setCurrentPage(totalPages)}
-                      className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${currentPage === totalPages ? 'bg-blue-600 text-white' : ' border-gray-300'}`}
-                    >
-                      {totalPages}
-                    </button>
-                  )}
-
-                  {/* Next */}
-                  <button
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(p => p + 1)}
-                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
-                  >
-                    Next
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
+                <div>
+                  Page {currentPage} of {totalPages}
                 </div>
-         
+
+                <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                    <div className="relative w-32">
+                      <select
+                        value={itemsPerPage}
+                        onChange={e => setItemsPerPage(Number(e.target.value))}
+                        className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
+                      >
+                        <option value={8}>8 per page</option>
+                        <option value={10}>10 per page</option>
+                        <option value={20}>20 per page</option>
+                        <option value={tableData.length}>All</option>
+                      </select>
+                      <FiChevronDown
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                        size={16}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {/* Previous */}
+                    <button
+                      disabled={currentPage === 1}
+                      onClick={() => setCurrentPage(p => p - 1)}
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 19l-7-7 7-7"
+                        />
+                      </svg>
+                      Previous
+                    </button>
+
+                    {/* First Page */}
+                    <button
+                      onClick={() => setCurrentPage(1)}
+                      className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
+                        currentPage === 1
+                          ? 'bg-blue-600 text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      1
+                    </button>
+
+                    {/* Dots before current */}
+                    {currentPage > 2 && <span className="px-2">...</span>}
+
+                    {/* Current Page */}
+                    {currentPage !== 1 && currentPage !== totalPages && (
+                      <button className="w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 bg-blue-600 text-white">
+                        {currentPage}
+                      </button>
+                    )}
+
+                    {/* Dots after current */}
+                    {currentPage < totalPages - 1 && (
+                      <span className="px-2">...</span>
+                    )}
+
+                    {/* Last Page */}
+                    {totalPages > 1 && (
+                      <button
+                        onClick={() => setCurrentPage(totalPages)}
+                        className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
+                          currentPage === totalPages
+                            ? 'bg-blue-600 text-white'
+                            : ' border-gray-300'
+                        }`}
+                      >
+                        {totalPages}
+                      </button>
+                    )}
+
+                    {/* Next */}
+                    <button
+                      disabled={currentPage === totalPages}
+                      onClick={() => setCurrentPage(p => p + 1)}
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+                    >
+                      Next
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
             </>

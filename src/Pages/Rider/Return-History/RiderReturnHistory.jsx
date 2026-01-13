@@ -35,7 +35,7 @@ const RiderReturnHistory = () => {
       const token = localStorage.getItem('token'); // token from localStorage
 
       const res = await axios.get(
-        'https://courierly.demo-bd.com/api/return-history',
+        `${import.meta.env.VITE_BASE_URL}/api/return-history`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

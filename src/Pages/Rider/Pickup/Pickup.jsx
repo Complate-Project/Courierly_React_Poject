@@ -11,9 +11,12 @@ import {
 import useTitle from '../../../Hooks/useTitle';
 import Spinier from '../../../Shared/Spinier/Spinier';
 
-const PICKUP_API = 'https://courierly.demo-bd.com/api/rider-pickup-parcel-list';
-const AUTO_PICKUP_API =
-  'https://courierly.demo-bd.com/api/rider-auto-pickup-parcel-list';
+const PICKUP_API = `${
+  import.meta.env.VITE_BASE_URL
+}/api/rider-pickup-parcel-list`;
+const AUTO_PICKUP_API = `${
+  import.meta.env.VITE_BASE_URL
+}/api/rider-auto-pickup-parcel-list`;
 
 const ITEMS_PER_PAGE = 8;
 
@@ -125,13 +128,11 @@ const Pickup = () => {
                 size={16}
               />
             </div>
-
-         
           </div>
 
           {/* Right Controls */}
           <div className="flex items-center gap-2 w-full lg:w-auto">
-               <div className="relative">
+            <div className="relative">
               <select className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2.5 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full">
                 <option>--- Select Merchant ---</option>
               </select>
@@ -140,7 +141,7 @@ const Pickup = () => {
                 size={16}
               />
             </div>
-               <button
+            <button
               onClick={() => fetchData(activeTab)}
               className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-all duration-300 font-medium flex items-center gap-2 justify-center"
             >
@@ -158,7 +159,6 @@ const Pickup = () => {
                 className="pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full lg:w-64"
               />
             </div>
-         
 
             <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
               <button className="p-2 rounded-md hover:bg-white hover:shadow-sm transition-all duration-300">

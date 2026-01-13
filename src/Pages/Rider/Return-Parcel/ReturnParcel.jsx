@@ -23,7 +23,7 @@ import Spinner from '../../../Shared/Spinier/Spinier';
 const ReturnParcel = () => {
   const [isGridView, setIsGridView] = useState(false);
   const [tableData, setTableData] = useState([]);
-  const [loading, setLoading] = useState(false); // ✅ loading state
+  const [loading, setLoading] = useState(false);
   const token = localStorage.getItem('token');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(8);
@@ -36,7 +36,7 @@ const ReturnParcel = () => {
     setLoading(true); // ✅ start loading
     try {
       const res = await axios.get(
-        'https://courierly.demo-bd.com/api/return-parcel-list',
+        `${import.meta.env.VITE_BASE_URL}/api/return-parcel-list`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -29,7 +29,7 @@ const RiderDeliveryParcel = () => {
         const token = localStorage.getItem('token');
 
         const response = await axios.get(
-          'https://courierly.demo-bd.com/api/delivery-parcel-list',
+          `${import.meta.env.VITE_BASE_URL}/api/delivery-parcel-list`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -37,7 +37,7 @@ const RiderDeliveryParcel = () => {
           }
         );
 
-        const mappedData = response.data.map((item) => ({
+        const mappedData = response.data.map(item => ({
           id: item.id,
           trackingId: item.tracking_id,
           merchantName: item.shop,
@@ -179,7 +179,9 @@ const RiderDeliveryParcel = () => {
               <button
                 onClick={() => setIsGridView(false)}
                 className={`p-2 rounded-md transition-all duration-300 ${
-                  !isGridView ? 'bg-white shadow-sm' : 'hover:bg-white hover:shadow-sm'
+                  !isGridView
+                    ? 'bg-white shadow-sm'
+                    : 'hover:bg-white hover:shadow-sm'
                 }`}
               >
                 <FiList
@@ -190,7 +192,9 @@ const RiderDeliveryParcel = () => {
               <button
                 onClick={() => setIsGridView(true)}
                 className={`p-2 rounded-md transition-all duration-300 ${
-                  isGridView ? 'bg-white shadow-sm' : 'hover:bg-white hover:shadow-sm'
+                  isGridView
+                    ? 'bg-white shadow-sm'
+                    : 'hover:bg-white hover:shadow-sm'
                 }`}
               >
                 <FiGrid
@@ -284,7 +288,9 @@ const RiderDeliveryParcel = () => {
                         </td>
                         <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <div>
-                            <div className="font-medium">{item.merchantName}</div>
+                            <div className="font-medium">
+                              {item.merchantName}
+                            </div>
                             <div className="text-gray-500 text-xs lg:hidden">
                               {item.merchantPhone}
                             </div>
@@ -295,7 +301,9 @@ const RiderDeliveryParcel = () => {
                         </td>
                         <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <div>
-                            <div className="font-medium">{item.customerName}</div>
+                            <div className="font-medium">
+                              {item.customerName}
+                            </div>
                             <div className="text-gray-500 text-xs xl:hidden">
                               {item.customerNumber}
                             </div>
@@ -345,7 +353,9 @@ const RiderDeliveryParcel = () => {
                             </button>
                             <button className="bg-blue-600 text-white px-2 py-1.5 rounded text-xs hover:bg-blue-700 transition-colors duration-200 flex items-center gap-1">
                               <FiCalendar size={10} />
-                              <span className="hidden sm:inline">Reschedule</span>
+                              <span className="hidden sm:inline">
+                                Reschedule
+                              </span>
                             </button>
                             <button className="bg-yellow-600 text-white px-2 py-1.5 rounded text-xs hover:bg-yellow-700 transition-colors duration-200 flex items-center gap-1">
                               <FiPackage size={10} />
@@ -364,164 +374,201 @@ const RiderDeliveryParcel = () => {
               </div>
 
               {/* Table Footer with Pagination */}
-            <div className="px-4 md:px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-700">
-  {/* Entries info */}
-  <div className="text-gray-600">
-    Showing <span className="font-medium text-gray-900">{paginatedData.length}</span> of{" "}
-    <span className="font-medium text-gray-900">{tableData.length}</span>{" "}
-    {tableData.length === 1 ? "entry" : "entries"}
-  </div>
+              <div className="px-4 md:px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-700">
+                {/* Entries info */}
+                <div className="text-gray-600">
+                  Showing{' '}
+                  <span className="font-medium text-gray-900">
+                    {paginatedData.length}
+                  </span>{' '}
+                  of{' '}
+                  <span className="font-medium text-gray-900">
+                    {tableData.length}
+                  </span>{' '}
+                  {tableData.length === 1 ? 'entry' : 'entries'}
+                </div>
 
-  {/* Controls container */}
-  <div className="flex flex-col sm:flex-row items-center gap-4">
-    {/* Rows per page */}
-    <div className="flex items-center gap-2">
-      <span className="text-gray-600 whitespace-nowrap">Rows per page:</span>
-      <select
-        className="bg-white border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-colors hover:border-gray-400"
-        value={itemsPerPage}
-        onChange={(e) => {
-          const value = e.target.value === "All" ? tableData.length : parseInt(e.target.value);
-          setItemsPerPage(value);
-          setCurrentPage(1);
-        }}
-        aria-label="Select rows per page"
-      >
-        <option value={8}>8</option>
-        <option value={10}>10</option>
-        <option value={25}>25</option>
-        <option value={50}>50</option>
-        <option value="All">All</option>
-      </select>
-    </div>
+                {/* Controls container */}
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  {/* Rows per page */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-600 whitespace-nowrap">
+                      Rows per page:
+                    </span>
+                    <select
+                      className="bg-white border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-colors hover:border-gray-400"
+                      value={itemsPerPage}
+                      onChange={e => {
+                        const value =
+                          e.target.value === 'All'
+                            ? tableData.length
+                            : parseInt(e.target.value);
+                        setItemsPerPage(value);
+                        setCurrentPage(1);
+                      }}
+                      aria-label="Select rows per page"
+                    >
+                      <option value={8}>8</option>
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value="All">All</option>
+                    </select>
+                  </div>
 
-    {/* Divider (hidden on mobile) */}
-    <div className="hidden sm:block h-6 w-px bg-gray-300" />
+                  {/* Divider (hidden on mobile) */}
+                  <div className="hidden sm:block h-6 w-px bg-gray-300" />
 
-    {/* Pagination */}
-    <div className="flex items-center gap-2">
-      {/* Page info */}
-   
+                  {/* Pagination */}
+                  <div className="flex items-center gap-2">
+                    {/* Page info */}
 
-{/* Pagination Buttons with truncation */}
-<div className="flex items-center gap-2 flex-wrap">
-  {/* Previous Button */}
-  <button
-    disabled={currentPage === 1}
-    onClick={() => setCurrentPage(p => p - 1)}
-    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow active:scale-95"
-  >
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-    </svg>
-    Previous
-  </button>
+                    {/* Pagination Buttons with truncation */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {/* Previous Button */}
+                      <button
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage(p => p - 1)}
+                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow active:scale-95"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 19l-7-7 7-7"
+                          />
+                        </svg>
+                        Previous
+                      </button>
 
-  {/* Page Numbers */}
-  <div className="flex items-center gap-1">
-    {/* Always show page 1 */}
-    <button
-      onClick={() => setCurrentPage(1)}
-      className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
-        currentPage === 1
-          ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-          : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow"
-      }`}
-    >
-      1
-    </button>
+                      {/* Page Numbers */}
+                      <div className="flex items-center gap-1">
+                        {/* Always show page 1 */}
+                        <button
+                          onClick={() => setCurrentPage(1)}
+                          className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
+                            currentPage === 1
+                              ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow'
+                          }`}
+                        >
+                          1
+                        </button>
 
-    {/* Show page 2 if it exists */}
-    {totalPages >= 2 && (
-      <button
-        onClick={() => setCurrentPage(2)}
-        className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
-          currentPage === 2
-            ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow"
-        }`}
-      >
-        2
-      </button>
-    )}
+                        {/* Show page 2 if it exists */}
+                        {totalPages >= 2 && (
+                          <button
+                            onClick={() => setCurrentPage(2)}
+                            className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
+                              currentPage === 2
+                                ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow'
+                            }`}
+                          >
+                            2
+                          </button>
+                        )}
 
-    {/* Dynamic page numbers with ellipsis */}
-    {(() => {
-      const pages = [];
-      const showEllipsisStart = currentPage > 3;
-      const showEllipsisEnd = currentPage < totalPages - 2;
+                        {/* Dynamic page numbers with ellipsis */}
+                        {(() => {
+                          const pages = [];
+                          const showEllipsisStart = currentPage > 3;
+                          const showEllipsisEnd = currentPage < totalPages - 2;
 
-      if (showEllipsisStart) {
-        pages.push(
-          <span key="ellipsis-start" className="px-2 text-gray-400">
-            ...
-          </span>
-        );
-      }
+                          if (showEllipsisStart) {
+                            pages.push(
+                              <span
+                                key="ellipsis-start"
+                                className="px-2 text-gray-400"
+                              >
+                                ...
+                              </span>
+                            );
+                          }
 
-      // Show current page and nearby pages
-      for (let i = Math.max(3, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
-        if (i > 2 && i < totalPages) {
-          pages.push(
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i)}
-              className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
-                currentPage === i
-                  ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow"
-              }`}
-            >
-              {i}
-            </button>
-          );
-        }
-      }
+                          // Show current page and nearby pages
+                          for (
+                            let i = Math.max(3, currentPage - 1);
+                            i <= Math.min(totalPages - 1, currentPage + 1);
+                            i++
+                          ) {
+                            if (i > 2 && i < totalPages) {
+                              pages.push(
+                                <button
+                                  key={i}
+                                  onClick={() => setCurrentPage(i)}
+                                  className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
+                                    currentPage === i
+                                      ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                                      : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow'
+                                  }`}
+                                >
+                                  {i}
+                                </button>
+                              );
+                            }
+                          }
 
-      if (showEllipsisEnd) {
-        pages.push(
-          <span key="ellipsis-end" className="px-2 text-gray-400">
-            ...
-          </span>
-        );
-      }
+                          if (showEllipsisEnd) {
+                            pages.push(
+                              <span
+                                key="ellipsis-end"
+                                className="px-2 text-gray-400"
+                              >
+                                ...
+                              </span>
+                            );
+                          }
 
-      return pages;
-    })()}
+                          return pages;
+                        })()}
 
-    {/* Show last page if there are more than 1 page */}
-    {totalPages > 2 && (
-      <button
-        onClick={() => setCurrentPage(totalPages)}
-        className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
-          currentPage === totalPages
-            ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-            : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow"
-        }`}
-      >
-        {totalPages}
-      </button>
-    )}
-  </div>
+                        {/* Show last page if there are more than 1 page */}
+                        {totalPages > 2 && (
+                          <button
+                            onClick={() => setCurrentPage(totalPages)}
+                            className={`w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg border transition-all duration-200 ${
+                              currentPage === totalPages
+                                ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 hover:border-gray-400 hover:shadow'
+                            }`}
+                          >
+                            {totalPages}
+                          </button>
+                        )}
+                      </div>
 
-  {/* Next Button */}
-  <button
-    disabled={currentPage === totalPages}
-    onClick={() => setCurrentPage(p => p + 1)}
-    className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow active:scale-95"
-  >
-    Next
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-    </svg>
-  </button>
-</div>
-
-
-
-    </div>
-  </div>
-</div>
+                      {/* Next Button */}
+                      <button
+                        disabled={currentPage === totalPages}
+                        onClick={() => setCurrentPage(p => p + 1)}
+                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 shadow-sm hover:shadow active:scale-95"
+                      >
+                        Next
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </>
           )}
         </div>

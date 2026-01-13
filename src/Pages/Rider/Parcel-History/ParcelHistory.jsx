@@ -27,7 +27,7 @@ const ParcelHistory = () => {
       setLoading(true);
       try {
         const res = await axios.get(
-          'https://courierly.demo-bd.com/api/parcel-history',
+          `${import.meta.env.VITE_BASE_URL}/api/parcel-history`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
