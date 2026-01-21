@@ -5,11 +5,12 @@ import usePickupData from './hooks/usePickupData';
 import { ITEMS_PER_PAGE } from './constants/pickupApi';
 import PickupHeader from './components/PickupHeader';
 import PickupTabs from './components/PickupTabs';
-import PickupControls from './components/PickupControls';
 import PickupTable from './components/PickupTable';
 import AutoPickupTable from './components/AutoPickupTable';
 import Pagination from './components/Pagination';
 import Spinner from '../../../Shared/Spinier/Spinier';
+import Controls from '../../../Shared/TableControler/Controls';
+import { PickupCardView } from './components/PickupCardView';
 
 const Pickup = () => {
   useTitle('Rider Dashboard | Pickup');
@@ -21,6 +22,7 @@ const Pickup = () => {
 
   // activeData
   const activeData = activeTab === 'pickup' ? pickupData : autoPickupData;
+  const [view, setView] = useState('list'); // 'list' | 'grid'
 
   // filteredData with tracking_id, customer_name, customer_phone
   const filteredData = activeData.filter(item => {
@@ -37,8 +39,14 @@ const Pickup = () => {
     setCurrentPage(1);
   }, [searchText, activeTab]);
 
-  const { currentPage, setCurrentPage, totalPages, paginatedData } =
-    usePagination(filteredData, ITEMS_PER_PAGE);
+  const {
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    paginatedData,
+    rowsPerPage,
+    setRowsPerPage,
+  } = usePagination(filteredData, ITEMS_PER_PAGE);
 
   useEffect(() => {
     fetchData(activeTab);
@@ -50,23 +58,32 @@ const Pickup = () => {
         <PickupHeader />
         <PickupTabs activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
-      <PickupControls
+      <Controls
         searchText={searchText}
         setSearchText={setSearchText}
         reload={() => fetchData(activeTab)}
-        paginatedData={paginatedData}
+        rowsPerPage={rowsPerPage}
+        setRowsPerPage={setRowsPerPage}
+        view={view}
+        setView={setView}
       />
 
       {loading ? (
         <Spinner />
-      ) : activeTab === 'pickup' ? (
-        <PickupTable
-          data={paginatedData}
-          currentPage={currentPage}
-          itemsPerPage={ITEMS_PER_PAGE}
-        />
+      ) : view === 'list' ? (
+        activeTab === 'pickup' ? (
+          <PickupTable
+            data={paginatedData}
+            currentPage={currentPage}
+            itemsPerPage={
+              rowsPerPage === 'All' ? paginatedData.length : rowsPerPage
+            }
+          />
+        ) : (
+          <AutoPickupTable data={paginatedData} />
+        )
       ) : (
-        <AutoPickupTable data={paginatedData} />
+        <PickupCardView data={paginatedData} />
       )}
 
       <Pagination
